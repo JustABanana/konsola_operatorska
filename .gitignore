@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/konsola_operatorska
+konsola_operatorska.so
+konsola_operatorska.dylib
+konsola_operatorska.dll
+konsola_operatorska.a
+konsola_operatorska.lib
+konsola_operatorska-test-*
+*.exe
+*.o
+*.obj
+*.lst

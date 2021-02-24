@@ -1,0 +1,13 @@
+{
+	"authors": [
+		"0.30000000000000004"
+	],
+	"copyright": "Copyright © 2021, 0.30000000000000004",
+	"dependencies": {
+		"gtk-d": "~>3.9.0"
+	},
+	"description": "Aplikacja na konkurs motorola science cup",
+	"license": "proprietary",
+	"name": "konsola_operatorska",
+	"dflags-dmd": ["-J=."]
+}
