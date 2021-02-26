@@ -2,7 +2,10 @@ import std.stdio;
 import std.random;
 import std.string;
 import gtk.MainWindow;
+import gtk.Label;
 import gtk.Main;
+import jsonizer.tojson;
+import basestation;
 
 string getRandomSplash()
 {
@@ -19,9 +22,16 @@ class AdminConWindow : MainWindow
     }
 }
 
-void main(string[] args)
+version (unittest)
 {
-    Main.init(args);
-    new AdminConWindow();
-    Main.run();
+    // Make sure we don't have a main in unittests
+}
+else
+{
+    void main(string[] args)
+    {
+        Main.init(args);
+        new AdminConWindow();
+        Main.run();
+    }
 }
