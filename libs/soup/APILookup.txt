@@ -1,0 +1,19 @@
+﻿wrap: soup
+file: Soup-2.4.gir
+
+
+addStructs: start
+struct sockaddr
+{
+    ushort sa_family;
+    char[]        sa_data;
+}
+addStructs: end
+
+struct: Socket
+    noCode: read_until
+
+struct: Socket
+	namespace:
+struct: Buffer
+	noProperty: data
