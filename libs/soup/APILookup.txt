@@ -17,3 +17,9 @@ struct: Socket
 	namespace:
 struct: Buffer
 	noProperty: data
+
+struct: Message
+	import: soup.MessageBody
+	code: start
+	    @property MessageBody responseBody() {return new MessageBody(soupMessage.responseBody);}
+	code: end
