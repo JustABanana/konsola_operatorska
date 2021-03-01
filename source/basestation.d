@@ -1,4 +1,5 @@
 import std.stdio;
+import std.format;
 import std.json;
 import jsonizer.fromjson;
 import jsonizer.jsonize;
@@ -7,7 +8,6 @@ import jsonizer;
 import soup.Session;
 import soup.Message;
 import soup.MessageBody;
-import utils : delegateToCallbackTuple;
 
 enum WorkingMode
 {
@@ -40,38 +40,110 @@ struct BaseStation
     @jsonize("Position") Position position;
 }
 
-void fetchBaseStations(void delegate(BaseStation[]) okCallback)
+class BaseStationFetchingError : Exception
+{
+    Status statusCode;
+    this(string msg = "", Status statusCode = Status.NONE,
+            string file = __FILE__, size_t line = __LINE__)
+    {
+        this.statusCode = statusCode;
+        super(msg, file, line);
+    }
+}
+
+/// Instantiated where there was a problem connecting to the server
+class ConnectionError : BaseStationFetchingError
+{
+    this(Status statusCode = SoupStatus.NONE, string file = __FILE__, size_t line = __LINE__)
+    {
+        super(format("Couldn't connect to the server: %s", statusCode), statusCode, file, line);
+    }
+}
+
+/// Instantiated where an error occured on the server(status codes 500-599)
+class ServerError : BaseStationFetchingError
+{
+    this(SoupStatus statusCode = SoupStatus.NONE, string file = __FILE__, size_t line = __LINE__)
+    {
+        super(format("A server error occured: %s", statusCode), statusCode, file, line);
+    }
+}
+
+/*
+   * Instantiated when the server returns a status code that indicates a 
+   * client error(status codes 400-499 or 300 status codes that aren't 
+   * just redirections) 
+*/
+class ClientError : BaseStationFetchingError
+{
+    this(SoupStatus statusCode = SoupStatus.NONE, string file = __FILE__, size_t line = __LINE__)
+    {
+        super(format("A client error occured, server sent: %s", statusCode), statusCode, file, line);
+    }
+}
+
+void fetchBaseStations(void delegate(BaseStation[]) okCallback,
+        void delegate(BaseStationFetchingError) errCallback)
 {
     Session sess = new Session();
     Message msg = new Message("GET", "http://localhost:8080/radios");
-    msg.addOnGotBody((Message m) { 
+    msg.addOnFinished((Message m) {
+
+        SoupStatus statusCode = cast(SoupStatus)(m.getMessageStruct().statusCode);
+
+        // Check if an error occured
+        if (statusCode >= 200 && statusCode < 300) // Everything is ok!
+        {
             string jsonStr = m.responseBody.data();
             BaseStation[] stations = fromJSONString!(BaseStation[])(jsonStr);
             okCallback(stations);
+        }
+        else if (statusCode > 0 && statusCode < 100) /* Status codes in the range of 1-100 are used 
+           by libsoup to indicate connection errors */
+        {
+            errCallback(new ConnectionError(statusCode));
+        }
+        else if (statusCode >= 300 && statusCode < 500) /* Status codes from 300-500 indicate that our client messed up
+           Since libsoup handles redirects for us we can assume every 
+           other status code is our mistake */
+        {
+            errCallback(new ClientError(statusCode));
+        }
+        else if (statusCode >= 500) /* Status codes higher or equal than 500
+           indicate server errors */
+        {
+            errCallback(new ConnectionError(statusCode));
+        }
+
     });
 
     sess.queueMessage(msg, null, null);
 }
+
 @("Fetch basestation correctly from the server")
 unittest
 {
     import glib.MainLoop;
+    import glib.MainContext;
     import std.socket;
     import std.stdio;
-    import std.algorithm: any;
-
+    import std.algorithm : any;
 
     // Check if there is a server running on port 8080
-    auto addresses = getAddress("localhost",8080);
-    bool connected = addresses.any!((a) { 
-            try {
-                new TcpSocket(a);
-            } catch (SocketException e) {
-               return false; 
-            }
-            return true;
+    auto addresses = getAddress("localhost", 8080);
+    bool connected = addresses.any!((a) {
+        try
+        {
+            new TcpSocket(a);
+        }
+        catch (SocketException e)
+        {
+            return false;
+        }
+        return true;
     });
-    if(!connected)  {
+    if (!connected)
+    {
         stderr.writefln("Couldn't connect to localhost:8080, is your server running");
         assert(false);
     }
@@ -79,13 +151,22 @@ unittest
     bool ok = false;
     bool* ok_ptr = &ok;
 
-    auto loop = new MainLoop(null);
-    fetchBaseStations((BaseStation[] bs) {
-               *ok_ptr = true; 
-               loop.quit();
-            });
-    loop.run();
+    auto loop = new MainLoop(new MainContext(null), true);
 
+    fetchBaseStations((BaseStation[] bs) { *ok_ptr = true; loop.quit(); },
+         (BaseStationFetchingError e) {
+      if (cast(ServerError)e)
+        {
+            *ok_ptr = true;
+        }
+        else
+        {
+            *ok_ptr = false;
+        }
+        loop.quit();
+    });
+
+    loop.run();
     assert(ok);
 }
 

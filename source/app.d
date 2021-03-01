@@ -36,7 +36,7 @@ else
     {
         Main.init(args);
         AdminConWindow win = new AdminConWindow();
-        fetchBaseStations((BaseStation[] bs) => writeln("aaaa"));
+        //fetchBaseStations((BaseStation[] bs) => writeln("aaaa"));
         Main.run();
     }
 }
