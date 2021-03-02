@@ -111,90 +111,87 @@ class ClientError : BaseStationFetchingError
     }
 }
 
-void fetchBaseStations(void delegate(BaseStation[]) okCallback,
-        void delegate(BaseStationFetchingError) errCallback)
-{
-    Session sess = new Session();
-    Message msg = new Message("GET", "http://localhost:8080/radios");
-    msg.addOnFinished((Message m) {
+/// Class used to fetch basestations from the server. 
+class BaseStationFetcher {
+    string url;
+    Session sess;
+    
+    /***********************************
+     * Params:
+     *         url = a string representing the url on the server to fetch the radios from, for example "http://localhost:8080/radios"
+     */
+    this(string url) {
+        this.url = url;
+        this.sess = new Session();
+    }
 
-        SoupStatus statusCode = cast(SoupStatus)(m.getMessageStruct().statusCode);
+    void fetchBaseStations(void delegate(BaseStation[]) okCallback,
+            void delegate(BaseStationFetchingError) errCallback)
+    {
+        Message msg = new Message("GET", url);
 
-        // Check if an error occured
-        if (statusCode >= 200 && statusCode < 300) // Everything is ok!
-        {
-            string jsonStr = m.responseBody.data();
-            BaseStation[] stations = fromJSONString!(BaseStation[])(jsonStr);
-            okCallback(stations);
-        }
-        else if (statusCode > 0 && statusCode < 100) /* Status codes in the range of 1-100 are used 
-           by libsoup to indicate connection errors */
-        {
-            errCallback(new ConnectionError(statusCode));
-        }
-        else if (statusCode >= 300 && statusCode < 500) /* Status codes from 300-500 indicate that our client messed up
-           Since libsoup handles redirects for us we can assume every 
-           other status code is our mistake */
-        {
-            errCallback(new ClientError(statusCode));
-        }
-        else if (statusCode >= 500) /* Status codes higher or equal than 500
-           indicate server errors */
-        {
-            errCallback(new ConnectionError(statusCode));
-        }
-
-    });
-
-    sess.queueMessage(msg, null, null);
+        msg.addOnFinished((Message m) {
+    
+            SoupStatus statusCode = cast(SoupStatus)(m.getMessageStruct().statusCode);
+    
+            // Check if an error occured
+            if (statusCode >= 200 && statusCode < 300) // Everything is ok!
+            {
+                string jsonStr = m.responseBody.data();
+                BaseStation[] stations = fromJSONString!(BaseStation[])(jsonStr);
+                okCallback(stations);
+            }
+            else if (statusCode > 0 && statusCode < 100) /* Status codes in the range of 1-100 are used 
+               by libsoup to indicate connection errors */
+            {
+                errCallback(new ConnectionError(statusCode));
+            }
+            else if (statusCode >= 300 && statusCode < 500) /* Status codes from 300-500 indicate that our client messed up
+               Since libsoup handles redirects for us we can assume every 
+               other status code is our mistake */
+            {
+                errCallback(new ClientError(statusCode));
+            }
+            else if (statusCode >= 500) /* Status codes higher or equal than 500
+               indicate server errors */
+            {
+                errCallback(new ConnectionError(statusCode));
+            }
+    
+        });
+    
+        sess.queueMessage(msg, null, null);
+    }
 }
 
-@("Fetch basestation correctly from the server")
+
+///
+@("Fetch basestations from the server")
 unittest
 {
     import glib.MainLoop;
     import glib.MainContext;
-    import std.socket;
-    import std.stdio;
-    import std.algorithm : any;
+    import test_utils : isServerRunning;
 
-    // Check if there is a server running on port 8080
-    auto addresses = getAddress("localhost", 8080);
-    bool connected = addresses.any!((a) {
-        try
-        {
-            new TcpSocket(a);
-        }
-        catch (SocketException e)
-        {
-            return false;
-        }
-        return true;
-    });
-    if (!connected)
+    if (!isServerRunning("localhost",8080))
     {
-        throw new Exception("[test runner] Couldn't connect to localhost:8080, is your server running");
+        throw new Exception("[test] Couldn't connect to localhost:8080, is your server running");
     }
 
-    bool ok = false;
-    bool* ok_ptr = &ok;
-
     auto loop = new MainLoop(new MainContext(null), true);
+    auto fetcher = new BaseStationFetcher("http://localhost:8080/radios");
+    BaseStationFetchingError err = null;
 
-    fetchBaseStations((BaseStation[] bs) { *ok_ptr = true; loop.quit(); },
+    fetcher.fetchBaseStations((BaseStation[] bs) => loop.quit() ,
          (BaseStationFetchingError e) {
-      if (cast(ServerError)e)
+      if (!cast(ServerError)e)
         {
-            *ok_ptr = true;
-        }
-        else
-        {
-            *ok_ptr = false;
+            err = e;
         }
         loop.quit();
     });
 
     loop.run();
-    assert(ok);
+    if(err) throw err;
 }
 
