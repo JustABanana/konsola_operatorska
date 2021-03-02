@@ -1,3 +1,6 @@
+///
+module konsola_operatorska.app;
+
 import std.stdio;
 import std.random;
 import std.string;
@@ -9,7 +12,7 @@ import gtk.Container;
 import gtk.Main;
 import std.functional : toDelegate;
 import jsonizer.tojson;
-import basestation;
+import konsola_operatorska.basestation;
 
 string getRandomSplash()
 {

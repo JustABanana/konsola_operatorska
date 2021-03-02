@@ -1,3 +1,6 @@
+/// 
+module konsola_operatorska.basestation;
+
 import std.stdio;
 import std.format;
 import std.json;
@@ -16,6 +19,8 @@ enum WorkingMode
     Data,
 }
 
+/** Simple position struct containing the lattitude and the longitude. 
+    Can be serialized and deserialized with jsonizer. */
 struct Position
 {
     mixin JsonizeMe;
@@ -27,6 +32,8 @@ struct Position
 Example station serialized as json
 {"Id":1,"Name":"KR 1","Type":"Portable","SerialNumber":"4686-4706-1775-00001","Strength":1,"BatteryLevel":25,"WorkingMode":"Idle","Position":{"Lat":"50.06528","Lon":"19.95947"}}
 */
+/** A struct representing the base station as sent to us by the server, 
+    deserialized from json */
 struct BaseStation
 {
     mixin JsonizeMe;
@@ -38,9 +45,31 @@ struct BaseStation
     @jsonize("BatteryLevel") int batteryLevel;
     @jsonize("WorkingMode") WorkingMode workingMode;
     @jsonize("Position") Position position;
+
 }
 
-class BaseStationFetchingError : Exception
+/// Example usage with the jsonize.fromJSONString function
+@("BaseStation correctly deserializes from json")
+unittest
+{
+    import std.math : approxEqual;
+
+    string jsonStr = `{"Id":1,"Name":"KR 1","Type":"Portable","SerialNumber":"4686-4706-1775-00001","Strength":1,"BatteryLevel":25,"WorkingMode":"Voice","Position":{"Lat":"50.06528","Lon":"19.95947"}}`;
+
+    BaseStation bs = fromJSONString!BaseStation(jsonStr);
+    assert(bs.id == 1);
+    assert(bs.name == "KR 1");
+    assert(bs.type == "Portable");
+    assert(bs.serialNumber == "4686-4706-1775-00001");
+    assert(bs.strength == 1);
+    assert(bs.batteryLevel == 25);
+    assert(bs.workingMode == WorkingMode.Voice);
+    assert(approxEqual(bs.position.lat, 50.06528));
+    assert(approxEqual(bs.position.lon, 19.95947));
+}
+
+/// Abstract class for exceptions that can occur when fetching base stations from the server.
+abstract class BaseStationFetchingError : Exception
 {
     Status statusCode;
     this(string msg = "", Status statusCode = Status.NONE,
@@ -69,10 +98,10 @@ class ServerError : BaseStationFetchingError
     }
 }
 
-/*
-   * Instantiated when the server returns a status code that indicates a 
-   * client error(status codes 400-499 or 300 status codes that aren't 
-   * just redirections) 
+/**
+   Instantiated when the server returns a status code that indicates a 
+   client error(status codes 400-499 or 3xx status codes that aren't 
+   just redirections) 
 */
 class ClientError : BaseStationFetchingError
 {
@@ -144,8 +173,7 @@ unittest
     });
     if (!connected)
     {
-        stderr.writefln("Couldn't connect to localhost:8080, is your server running");
-        assert(false);
+        throw new Exception("[test runner] Couldn't connect to localhost:8080, is your server running");
     }
 
     bool ok = false;
@@ -170,21 +198,3 @@ unittest
     assert(ok);
 }
 
-@("BaseStation correctly deserializes from json")
-unittest
-{
-    import std.math : approxEqual;
-
-    string jsonStr = `{"Id":1,"Name":"KR 1","Type":"Portable","SerialNumber":"4686-4706-1775-00001","Strength":1,"BatteryLevel":25,"WorkingMode":"Voice","Position":{"Lat":"50.06528","Lon":"19.95947"}}`;
-
-    BaseStation bs = fromJSONString!BaseStation(jsonStr);
-    assert(bs.id == 1);
-    assert(bs.name == "KR 1");
-    assert(bs.type == "Portable");
-    assert(bs.serialNumber == "4686-4706-1775-00001");
-    assert(bs.strength == 1);
-    assert(bs.batteryLevel == 25);
-    assert(bs.workingMode == WorkingMode.Voice);
-    assert(approxEqual(bs.position.lat, 50.06528));
-    assert(approxEqual(bs.position.lon, 19.95947));
-}
