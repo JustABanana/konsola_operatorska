@@ -6,11 +6,21 @@
 	"dependencies": {
 		"gtk-d": "~>3.9.0",
 		"jsonizer": "~>0.7.6",
-		"silly": "~>1.1.1"
+		"silly": "~>1.1.1",
+		"soup": "*"
 	},
 	"description": "Aplikacja na konkurs motorola science cup",
 	"dflags-dmd": [
 		"-J=."
+	],
+	"configurations": [
+		{
+			"name": "executable",
+			"targetType": "executable"
+		},
+		{
+			"name": "unittest"
+		}
 	],
 	"license": "proprietary",
 	"name": "konsola_operatorska"

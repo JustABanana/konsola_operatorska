@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+out
+/libsoup
+libsoup.so
+libsoup.dylib
+libsoup.dll
+libsoup.a
+libsoup.lib
+libsoup-test-*
+*.exe
+*.o
+*.obj
+*.lst

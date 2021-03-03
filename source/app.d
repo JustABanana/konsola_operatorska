@@ -1,11 +1,18 @@
+///
+module konsola_operatorska.app;
+
 import std.stdio;
 import std.random;
 import std.string;
 import gtk.MainWindow;
+import gtk.Window;
 import gtk.Label;
+import gtk.Widget;
+import gtk.Container;
 import gtk.Main;
+import std.functional : toDelegate;
 import jsonizer.tojson;
-import basestation;
+import konsola_operatorska.basestation;
 
 string getRandomSplash()
 {
@@ -31,7 +38,8 @@ else
     void main(string[] args)
     {
         Main.init(args);
-        new AdminConWindow();
+        AdminConWindow win = new AdminConWindow();
+        //fetchBaseStations((BaseStation[] bs) => writeln("aaaa"));
         Main.run();
     }
 }
