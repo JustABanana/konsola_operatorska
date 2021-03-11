@@ -3,6 +3,7 @@
 	"versions": {
 		"glibd": "2.3.0",
 		"gtk-d": "3.9.0",
+		"gtk_utils": "~master",
 		"jsonizer": "0.7.6",
 		"silly": "1.1.1",
 		"soup": "~master"

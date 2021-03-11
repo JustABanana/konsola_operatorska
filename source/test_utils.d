@@ -1,5 +1,5 @@
 /// A small utility function to make sure that there is a server at address that has the specified port open 
-bool isServerRunning(string address, uint port)
+bool isServerRunning(string address, ushort port)
 {
     import std.socket;
     import std.algorithm : any;

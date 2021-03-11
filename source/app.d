@@ -4,15 +4,15 @@ module konsola_operatorska.app;
 import std.stdio;
 import std.random;
 import std.string;
+
 import gtk.MainWindow;
-import gtk.Window;
-import gtk.Label;
-import gtk.Widget;
-import gtk.Container;
 import gtk.Main;
-import std.functional : toDelegate;
-import jsonizer.tojson;
+import gtk.ListStore;
+import gtk.TreeIter;
+import gtk.Application;
+
 import konsola_operatorska.basestation;
+import konsola_operatorska.basestation_treeview;
 
 string getRandomSplash()
 {
@@ -20,11 +20,28 @@ string getRandomSplash()
     return choice(splashes);
 }
 
+class MyApplication : Application
+{
+    import gtkd.Implement;
+    import gobject.c.functions : g_object_newv;
+
+    mixin ImplementClass!GtkApplication;
+
+    this()
+    {
+
+        super(null, GApplicationFlags.FLAGS_NONE);
+    }
+}
+
 class AdminConWindow : MainWindow
 {
     this()
     {
         super("Konsola Operatorska: " ~ getRandomSplash());
+        auto bs_tv = new BaseStationTreeView();
+
+        add(bs_tv);
         showAll();
     }
 }
@@ -39,7 +56,6 @@ else
     {
         Main.init(args);
         AdminConWindow win = new AdminConWindow();
-        //fetchBaseStations((BaseStation[] bs) => writeln("aaaa"));
         Main.run();
     }
 }
