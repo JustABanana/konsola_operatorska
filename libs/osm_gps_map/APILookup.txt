@@ -1,0 +1,6 @@
+﻿wrap: osm_gps_map
+file: OsmGpsMap-1.0.gir
+
+struct: MapPoint
+	noCode: new_radians_with_user_data
+	noCode: new_radians

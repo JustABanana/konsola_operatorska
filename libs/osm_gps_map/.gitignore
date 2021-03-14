@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+out
+/libosm_gps_map
+libosm_gps_map.so
+libosm_gps_map.dylib
+libosm_gps_map.dll
+libosm_gps_map.a
+libosm_gps_map.lib
+libosm_gps_map-test-*
+*.exe
+*.o
+*.obj
+*.lst
