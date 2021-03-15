@@ -1,0 +1,23 @@
+{
+	"dependencies": {
+		"glibd": "~>2.3.0",
+		"gtk-d": "~>3.9.0"
+	},
+	"importPaths": [
+		"out",
+		"source"
+	],
+	"name": "rsvg",
+	"preGenerateCommands-posix": [
+		"dub fetch girtod || true",
+		"cd $PACKAGE_DIR && dub run girtod -- --use-runtime-linker"
+	],
+	"preGenerateCommands-windows": [
+		"dub fetch girtod || VER>NUL",
+		"cd $PACKAGE_DIR && dub run girtod -- --use-runtime-linker"
+	],
+	"sourcePaths": [
+		"out"
+	],
+	"targetType": "library"
+}

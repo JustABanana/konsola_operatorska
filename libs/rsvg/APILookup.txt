@@ -1,0 +1,2 @@
+﻿wrap: rsvg 
+file: Rsvg-2.0.gir
