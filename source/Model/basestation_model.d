@@ -143,10 +143,19 @@ unittest
         throw err;
 }
 
+class StationWithEvents {
+    BaseStation station;
+    mixin Signal!() Changed;
+    mixin Signal!() Removed;
+    this(BaseStation station) {
+        this.station = station;
+    }
+}
+
 class BaseStationModel
 {
     /// Map of basestation id to basestations
-    BaseStation[int] stations;
+    StationWithEvents[int] stations;
     BaseStationFetcher fetcher;
 
     /***********************************
@@ -167,41 +176,41 @@ class BaseStationModel
 
     void updateItems(BaseStation[] stations)
     {
-        BaseStation[int] oldStations = this.stations;
-        BaseStation[int] newStations;
+        StationWithEvents[int] oldStations = this.stations;
+        StationWithEvents[int] newStations;
 
         foreach (newStation; stations)
         {
-            newStations[newStation.id] = newStation;
 
             if (auto oldStation = newStation.id in oldStations)
             {
-                if (newStation != *oldStation)
+                newStations[newStation.id] = *oldStation;
+                if (newStation != oldStation.station)
                 {
-                    StationChanged.emit(newStation);
+                    oldStation.Changed.emit();
                 }
 
                 /* Removing all items that were moved to the new map
 		   so we know that the remaining ones were removed */
-                oldStations.remove(oldStation.id);
+                oldStations.remove(oldStation.station.id);
             }
             else
             {
-                StationAdded.emit(newStation);
+                auto newStationEvents = new StationWithEvents(newStation);
+                newStations[newStation.id] = newStationEvents;
+                StationAdded.emit(newStationEvents);
             }
         }
 
         // Remove remaining iters
         foreach (removedStation; oldStations.values())
         {
-            StationRemoved.emit(removedStation);
+            removedStation.Removed.emit();
         }
 
         this.stations = newStations;
     }
 
-    mixin Signal!(BaseStation) StationAdded;
-    mixin Signal!(BaseStation) StationRemoved;
-    mixin Signal!(BaseStation) StationChanged;
+    mixin Signal!(StationWithEvents) StationAdded;
 
 }

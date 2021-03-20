@@ -14,7 +14,6 @@ import std.stdio;
 /// Pseudo model for using the basestation_model with GTK's tree view
 class BaseStationListStore : ListStore
 {
-    TreeIter[int] idToIter;
     BaseStationModel model;
 
     this(BaseStationModel model)
@@ -34,43 +33,19 @@ class BaseStationListStore : ListStore
 	this.model = model;
 
 	foreach(station; model.stations.values()) {
-	    TreeIter iter = createIter();
-	    this.setBaseStationRow(iter,station);
-	    this.idToIter[station.id] = iter;
+	    this.onStationAdded(station);
 	}
 
 	model.StationAdded.connect(&this.onStationAdded);
-	model.StationChanged.connect(&this.onStationChanged);
-	model.StationRemoved.connect(&this.onStationRemoved);
     }
 
-    void onStationAdded(BaseStation station) {
-	// A station with this ID already exists print a warning and remove the old one
-	if(auto iter = station.id in idToIter) {
-	    stderr.writefln("Duplicate station ID: %d, removing", station.id);
-	    remove(*iter);
-	}
-
+    void onStationAdded(StationWithEvents stationEvent) {
 	auto iter = createIter();
-	idToIter[station.id] = iter;
-	setBaseStationRow(iter,station);
-    }
-
-    void onStationChanged(BaseStation station) {
-	if(auto iter = station.id in idToIter) {
-	    setBaseStationRow(*iter,station);
-	} else {
-	    stderr.writefln("missing station id: %d in chagned signal", station.id);
-	    onStationAdded(station);
-	}
-    }
-
-    void onStationRemoved(BaseStation station) {
-	if(auto iter = station.id in idToIter) {
-	    remove(*iter);
-	} else {
-	    stderr.writefln("missing station id: %d in removed signal", station.id);
-	}
+	setBaseStationRow(iter,stationEvent.station);
+	stationEvent.Changed.connect(() => setBaseStationRow(iter, stationEvent.station));
+	stationEvent.Removed.connect({
+		remove(iter);
+	    });
     }
 
     void setBaseStationRow(TreeIter iter, BaseStation bs) {
