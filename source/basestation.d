@@ -17,6 +17,13 @@ enum WorkingMode
     Data,
 }
 
+enum DeviceType
+{
+    Portable,
+    Car,
+    BaseStation,
+}
+
 /** Simple position struct containing the lattitude and the longitude. 
     Can be serialized and deserialized with jsonizer. */
 struct Position
@@ -37,7 +44,7 @@ struct BaseStation
     mixin JsonizeMe;
     @jsonize("Id") int id;
     @jsonize("Name") string name;
-    @jsonize("Type") string type;
+    @jsonize("Type") DeviceType type;
     @jsonize("SerialNumber") string serialNumber;
     @jsonize("Strength") int strength;
     @jsonize("BatteryLevel") int batteryLevel;
@@ -56,7 +63,7 @@ unittest
     BaseStation bs = fromJSONString!BaseStation(jsonStr);
     assert(bs.id == 1);
     assert(bs.name == "KR 1");
-    assert(bs.type == "Portable");
+    assert(bs.type == DeviceType.Portable);
     assert(bs.serialNumber == "4686-4706-1775-00001");
     assert(bs.strength == 1);
     assert(bs.batteryLevel == 25);
