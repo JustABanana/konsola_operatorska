@@ -13,6 +13,7 @@ import gtk.Application;
 
 import konsola_operatorska.basestation;
 import konsola_operatorska.basestation_treeview;
+import konsola_operatorska.assets;
 
 string getRandomSplash()
 {
@@ -40,6 +41,8 @@ class AdminConWindow : MainWindow
     {
         super("Konsola Operatorska: " ~ getRandomSplash());
         auto bs_tv = new BaseStationTreeView();
+        loadResource();
+        addIcons();
 
         add(bs_tv);
         showAll();

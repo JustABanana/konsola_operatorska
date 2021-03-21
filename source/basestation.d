@@ -12,14 +12,14 @@ import std.algorithm.comparison : equal;
 
 enum WorkingMode
 {
-    Idle,
+    Idle = 0,
     Voice,
     Data,
 }
 
-enum DeviceType
+enum StationType
 {
-    Portable,
+    Portable = 0,
     Car,
     BaseStation,
 }
@@ -44,7 +44,7 @@ struct BaseStation
     mixin JsonizeMe;
     @jsonize("Id") int id;
     @jsonize("Name") string name;
-    @jsonize("Type") DeviceType type;
+    @jsonize("Type") StationType type;
     @jsonize("SerialNumber") string serialNumber;
     @jsonize("Strength") int strength;
     @jsonize("BatteryLevel") int batteryLevel;
@@ -63,7 +63,7 @@ unittest
     BaseStation bs = fromJSONString!BaseStation(jsonStr);
     assert(bs.id == 1);
     assert(bs.name == "KR 1");
-    assert(bs.type == DeviceType.Portable);
+    assert(bs.type == StationType.Portable);
     assert(bs.serialNumber == "4686-4706-1775-00001");
     assert(bs.strength == 1);
     assert(bs.batteryLevel == 25);

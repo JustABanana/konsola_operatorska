@@ -14,3 +14,4 @@ konsola_operatorska-test-*
 *.o
 *.obj
 *.lst
+assets/generated/res.gresource

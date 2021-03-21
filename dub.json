@@ -13,6 +13,12 @@
 	"dflags-dmd": [
 		"-J=."
 	],
+	"preGenerateCommands-posix": [
+		"cd $PACKAGE_DIR && glib-compile-resources --sourcedir=assets --target=assets/generated/res.gresource assets/gresource.xml"
+	],
+	"preGenerateCommands-windows": [
+		"cd $PACKAGE_DIR && glib-compile-resources.exe --sourcedir=assets --target=assets/generated/res.gresource assets/gresource.xml"
+	],
 	"configurations": [
 		{
 			"name": "executable",
