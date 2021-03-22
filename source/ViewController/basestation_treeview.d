@@ -17,6 +17,7 @@ import gtk.TreeIter;
 
 import std.stdio;
 import std.meta;
+import std.conv;
 
 enum Column
 {
@@ -45,7 +46,7 @@ class BaseStationListStore : ListStore
 		GType.STRING, //SerialNumber
 		GType.INT, //Strength
                 GType.INT, //BatteryLevel
-		GType.INT, //WorkingMode - enum as an int
+		GType.STRING, //WorkingMode
         ]);
 
 	this.model = model;
@@ -76,7 +77,7 @@ class BaseStationListStore : ListStore
 		setValue(iter, Column.Serial, bs.serialNumber);
 		setValue(iter, Column.Strength, bs.strength);
 		setValue(iter, Column.BatteryLevel, bs.batteryLevel);
-		setValue(iter, Column.WorkingMode, bs.workingMode);
+		setValue(iter, Column.WorkingMode, bs.workingMode.to!string);
 
     }
 
@@ -98,24 +99,9 @@ class StationTextColumn : TreeViewColumn
 	} 
 } 
 
-class StationTypeCol: TreeViewColumn
-{
-    CellRendererPixbuf cellRenderer;
-    Column col = Column.Type;
-    string columnName = "Type";
-    this()
-    {
-	cellRenderer = new CellRendererPixbuf();
-	super(columnName, cellRenderer, "icon-name", col); 
-	cellRenderer.setProperty("icon-name", "broadcast-tower");
-
-	this.setSortColumnId(col);
-	this.setReorderable(true);
-
-	this.setResizable(false);
-
-
-	this.setCellDataFunc(cellRenderer, delegateToCallbackTuple((GtkTreeViewColumn* col_c, GtkCellRenderer* ren_c, GtkTreeModel* model_c, GtkTreeIter* iter_c) { 
+extern(C) {
+    /// Function passed to gtk in a TreeViewColumn to convert the StationType enum into a CellRendererPixbuf 
+    void stationTypeCellDataFunc(GtkTreeViewColumn* col_c, GtkCellRenderer* ren_c, GtkTreeModel* model_c, GtkTreeIter* iter_c, void* data) { 
 		    // Convert arguments from C types to D types
 		    auto ren = new CellRenderer(ren_c);
 		    auto model = new TreeModel(model_c);
@@ -137,7 +123,26 @@ class StationTypeCol: TreeViewColumn
 				break;
 	        	}
 		    ren.setProperty("icon-name", typeIconName);
-	}).expand, null);
+	}
+}
+
+class StationTypeCol: TreeViewColumn
+{
+    CellRendererPixbuf cellRenderer;
+    Column col = Column.Type;
+    string columnName = "Type";
+    this()
+    {
+	cellRenderer = new CellRendererPixbuf();
+	super(columnName, cellRenderer, "icon-name", col); 
+	cellRenderer.setProperty("icon-name", "broadcast-tower");
+
+	this.setSortColumnId(col);
+	this.setReorderable(true);
+
+	this.setResizable(false);
+
+	this.setCellDataFunc(cellRenderer, &stationTypeCellDataFunc, null, null);
     }
 }
 
