@@ -1,8 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <gresources>
   <gresource prefix="/icons/scalable/actions">
     <file alias="truck.svg">icons/truck.svg</file>
+    <file alias="truck-symbolic.svg">icons/truck.svg</file>
+
     <file alias="mobile.svg">icons/mobile.svg</file>
+    <file alias="mobile-symbolic.svg">icons/mobile.svg</file>
+
     <file alias="broadcast-tower.svg">icons/broadcast-tower.svg</file>
+    <file alias="broadcast-tower-symbolic.svg">icons/broadcast-tower.svg</file>
   </gresource>
 </gresources>

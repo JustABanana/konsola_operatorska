@@ -1,3 +1,3 @@
 All icons used come from font awesome, without any changes
-https://fontawesome.com/
+https://fontawesome.com/license
 licened under CC BY 4.0

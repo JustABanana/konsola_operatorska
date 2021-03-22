@@ -9,7 +9,6 @@ import jsonizer;
 
 import std.algorithm.comparison : equal;
 
-
 enum WorkingMode
 {
     Idle = 0,

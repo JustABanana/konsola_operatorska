@@ -2,20 +2,25 @@
 module konsola_operatorska.utils;
 
 /// A class that calls the delegate given to it in the constructor. See [delegateToObjectDelegate] for details
-class DelegateCaller(T) {
-	T delegate() del;
-	this(T delegate() del) {
-		this.del = del;
-	}
-	T call() {
-		return del();
-	}
+class DelegateCaller(T)
+{
+    T delegate() del;
+    this(T delegate() del)
+    {
+        this.del = del;
+    }
+
+    T call()
+    {
+        return del();
+    }
 }
 
 /// Converts a delegate into another delegate called on an object.
 /// This is neccessarry because of https://issues.dlang.org/show_bug.cgi?id=9603
-T delegate() delegateToObjectDelegate(T)(T delegate() del) {
-	return &(new DelegateCaller!T(del)).call;	
+T delegate() delegateToObjectDelegate(T)(T delegate() del)
+{
+    return &(new DelegateCaller!T(del)).call;
 }
 
 // Code taken from https://gitlab.com/Gert-dev/grestful/-/blob/master/Generic/Utility.d#L254
@@ -53,14 +58,13 @@ struct DelegatePointer(ReturnType, Parameters...)
  *
  * @return Whatever the delegate returns.
  */
-extern(C) nothrow static ReturnType invokeDelegatePointerFunc(DataType, ReturnType, Parameters...)(
-    Parameters parameters,
-    void* delegatePointer
-) {
+extern (C) nothrow static ReturnType invokeDelegatePointerFunc(DataType, ReturnType, Parameters...)(
+        Parameters parameters, void* delegatePointer)
+{
     try
     {
         // Explicit cast needed for void return types.
-        return cast(ReturnType) (cast(DataType) delegatePointer).delegateInstance(parameters);
+        return cast(ReturnType)(cast(DataType) delegatePointer).delegateInstance(parameters);
     }
 
     catch (Exception e)
@@ -88,9 +92,5 @@ auto delegateToCallbackTuple(ReturnType, Parameters...)(ReturnType delegate(Para
     auto dataForCallback = cast(void*) delegatePointer;
 
     return Tuple!(typeof(callback), "callback", typeof(dataForCallback), "data")(
-        callback,
-        dataForCallback
-    );
+            callback, dataForCallback);
 }
-
-

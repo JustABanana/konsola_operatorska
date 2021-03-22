@@ -11,11 +11,23 @@ import gtk.TreeModel;
 import gtk.CellRenderer;
 import gtk.CellRendererText;
 import gtk.CellRendererPixbuf;
+import gtk.CellRendererProgress;
 import gtk.ListStore;
 import gtk.TreeIter;
 
 import std.stdio;
 import std.meta;
+
+enum Column
+{
+    Id = 0,
+    Name = 1,
+    Type = 2,
+    Serial = 3,
+    Strength = 4,
+    BatteryLevel = 5,
+    WorkingMode = 6
+}
 
 /// Pseudo model for using the basestation_model with GTK's tree view
 class BaseStationListStore : ListStore
@@ -33,7 +45,7 @@ class BaseStationListStore : ListStore
 		GType.STRING, //SerialNumber
 		GType.INT, //Strength
                 GType.INT, //BatteryLevel
-		GType.STRING, //WorkingMode
+		GType.INT, //WorkingMode - enum as an int
         ]);
 
 	this.model = model;
@@ -58,13 +70,13 @@ class BaseStationListStore : ListStore
     }
 
     void setBaseStationRow(TreeIter iter, BaseStation bs) {
-		setValue(iter, 0, bs.id);
-		setValue(iter, 1, bs.name);
-		setValue(iter, 2, bs.type);
-		setValue(iter, 3, bs.serialNumber);
-		setValue(iter, 4, bs.strength);
-		setValue(iter, 5, bs.batteryLevel);
-		setValue(iter, 6, bs.workingMode);
+		setValue(iter, Column.Id, bs.id);
+		setValue(iter, Column.Name, bs.name);
+		setValue(iter, Column.Type, bs.type);
+		setValue(iter, Column.Serial, bs.serialNumber);
+		setValue(iter, Column.Strength, bs.strength);
+		setValue(iter, Column.BatteryLevel, bs.batteryLevel);
+		setValue(iter, Column.WorkingMode, bs.workingMode);
 
     }
 
@@ -75,12 +87,12 @@ class StationTextColumn : TreeViewColumn
 	CellRendererText cellRendererText;
 	string attributeType = "text";
 
-	this(string columnTitle, int columnNumber)
+	this(string columnTitle, Column col)
 	{
 		cellRendererText = new CellRendererText();
 		
-		super(columnTitle, cellRendererText, attributeType, columnNumber);
-		setSortColumnId(columnNumber);
+		super(columnTitle, cellRendererText, attributeType, col);
+		setSortColumnId(col);
 		this.setReorderable(true);
 		this.setResizable(true);
 	} 
@@ -89,16 +101,18 @@ class StationTextColumn : TreeViewColumn
 class StationTypeCol: TreeViewColumn
 {
     CellRendererPixbuf cellRenderer;
-    uint columnNumber = 2;
+    Column col = Column.Type;
     string columnName = "Type";
     this()
     {
 	cellRenderer = new CellRendererPixbuf();
-	super(columnName, cellRenderer, "icon-name", columnNumber); 
+	super(columnName, cellRenderer, "icon-name", col); 
 	cellRenderer.setProperty("icon-name", "broadcast-tower");
+
+	this.setSortColumnId(col);
 	this.setReorderable(true);
-	this.setResizable(true);
-	this.setSortColumnId(columnNumber);
+
+	this.setResizable(false);
 
 
 	this.setCellDataFunc(cellRenderer, delegateToCallbackTuple((GtkTreeViewColumn* col_c, GtkCellRenderer* ren_c, GtkTreeModel* model_c, GtkTreeIter* iter_c) { 
@@ -113,13 +127,13 @@ class StationTypeCol: TreeViewColumn
 	        	string typeIconName;
 	        	final switch(bs_type) {
 	        	    case StationType.Portable:
-				typeIconName = "mobile";
+				typeIconName = "mobile-symbolic";
 				break;
 	        	    case StationType.Car:
-	        		typeIconName = "truck";
+	        		typeIconName = "truck-symbolic";
 	        		break;
 	        	    case StationType.BaseStation:
-	        		typeIconName = "broadcast-tower";
+	        		typeIconName = "broadcast-tower-symbolic";
 				break;
 	        	}
 		    ren.setProperty("icon-name", typeIconName);
@@ -129,35 +143,35 @@ class StationTypeCol: TreeViewColumn
 
 class BatteryLevelCol: TreeViewColumn
 {
-    CellRendererPixbuf cellRenderer;
-    this(string columnTitle, int columnNumber)
+    CellRendererProgress cellRenderer;
+    this()
     {
-	cellRenderer = new CellRendererPixbuf();
-	cellRenderer.setProperty("icon-name", "broadcast-tower");
-	super(columnTitle, cellRenderer, null, columnNumber); 
+	cellRenderer = new CellRendererProgress();
+
+	super("Battery Level", cellRenderer, "value", Column.BatteryLevel); 
+
 	this.setReorderable(true);
-	this.setResizable(true);
+	this.setSortColumnId(Column.BatteryLevel);
+
+	this.setResizable(false);
     }
 }
 
 class BaseStationTreeView : TreeView {
     BaseStationListStore listStore;
     this() {
-	this.addCol("ID", 0);
-	this.addCol("Name", 1);
+	appendColumn(new StationTextColumn("ID", Column.Id));
+	appendColumn(new StationTextColumn("Name", Column.Name));
 	appendColumn(new StationTypeCol());
-	this.addCol("Serial", 3);
-	this.addCol("Signal Strength", 4);
-	this.addCol("Battery Level", 5);
-	this.addCol("Working Mode", 6);
+	appendColumn(new StationTextColumn("Serial", Column.Serial));
+	appendColumn(new StationTextColumn("Signal Strength", Column.Strength));
+	appendColumn(new BatteryLevelCol());
+	appendColumn(new StationTextColumn("Working Mode", Column.WorkingMode));
 	
 	auto model = new BaseStationModel("http://localhost:8080/radios");
 
 	auto listStore = new BaseStationListStore(model);
 	this.listStore = listStore;
 	setModel(listStore);
-    }
-    void addCol(string name, int id) {
-	appendColumn(new StationTextColumn(name, id));
     }
 }

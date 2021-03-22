@@ -143,11 +143,13 @@ unittest
         throw err;
 }
 
-class StationWithEvents {
+class StationWithEvents
+{
     BaseStation station;
     mixin Signal!() Changed;
     mixin Signal!() Removed;
-    this(BaseStation station) {
+    this(BaseStation station)
+    {
         this.station = station;
     }
 }
