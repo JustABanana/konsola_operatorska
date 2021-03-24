@@ -8,6 +8,9 @@ import gtk.TreeView;
 import gtk.TreeViewColumn;
 import gtk.TreeModel;
 
+import gtk.StyleContext;
+import gtk.Widget;
+
 import gtk.CellRenderer;
 import gtk.CellRendererText;
 import gtk.CellRendererPixbuf;
@@ -44,7 +47,7 @@ class BaseStationListStore : ListStore
 		GType.STRING, //Name
 		GType.INT, //Type - enum as an int
 		GType.STRING, //SerialNumber
-		GType.INT, //Strength
+		GType.INT, //Strength - Times 10, to get strength as a percentage
                 GType.INT, //BatteryLevel
 		GType.STRING, //WorkingMode
         ]);
@@ -75,7 +78,7 @@ class BaseStationListStore : ListStore
 		setValue(iter, Column.Name, bs.name);
 		setValue(iter, Column.Type, bs.type);
 		setValue(iter, Column.Serial, bs.serialNumber);
-		setValue(iter, Column.Strength, bs.strength);
+		setValue(iter, Column.Strength, bs.strength*10); // Times 10, to get strength as a percentage
 		setValue(iter, Column.BatteryLevel, bs.batteryLevel);
 		setValue(iter, Column.WorkingMode, bs.workingMode.to!string);
 
@@ -162,6 +165,22 @@ class BatteryLevelCol: TreeViewColumn
     }
 }
 
+class SignalStrengthCol: TreeViewColumn
+{
+    CellRendererProgress cellRenderer;
+    this()
+    {
+	cellRenderer = new CellRendererProgress();
+
+	super("Signal", cellRenderer, "value", Column.Strength); 
+
+	this.setReorderable(true);
+	this.setSortColumnId(Column.Strength);
+
+	this.setResizable(false);
+    }
+}
+
 class BaseStationTreeView : TreeView {
     BaseStationListStore listStore;
     this() {
@@ -169,7 +188,7 @@ class BaseStationTreeView : TreeView {
 	appendColumn(new StationTextColumn("Name", Column.Name));
 	appendColumn(new StationTypeCol());
 	appendColumn(new StationTextColumn("Serial", Column.Serial));
-	appendColumn(new StationTextColumn("Signal Strength", Column.Strength));
+	appendColumn(new SignalStrengthCol());
 	appendColumn(new BatteryLevelCol());
 	appendColumn(new StationTextColumn("Working Mode", Column.WorkingMode));
 	
