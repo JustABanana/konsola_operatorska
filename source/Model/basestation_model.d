@@ -2,6 +2,7 @@ module konsola_operatorska.basestation_model;
 
 import konsola_operatorska.basestation;
 import konsola_operatorska.station_fetcher;
+public import konsola_operatorska.station_fetcher : FetchingError, ConnectionError, ServerError, ClientError;
 
 import std.signals;
 import std.stdio;
@@ -36,8 +37,13 @@ class BaseStationModel
 
         // Start fetching and updating the model
         new Timeout(5000, {
-            this.fetcher.fetchStations((BaseStation[] bs) => this.updateItems(bs),
-                (BaseStationFetchingError e) => writeln(e));
+            this.fetcher.fetchStations((BaseStation[] bs) { 
+                    this.updateItems(bs);
+                    this.FetchingSucessful.emit();
+                },
+                (FetchingError e) { 
+                    this.FetchingFailed.emit(e);
+                });
             return true;
         }, true);
     }
@@ -80,5 +86,8 @@ class BaseStationModel
     }
 
     mixin Signal!(StationWithEvents) StationAdded;
+
+    mixin Signal!() FetchingSucessful;
+    mixin Signal!(FetchingError) FetchingFailed;
 
 }

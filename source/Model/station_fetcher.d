@@ -14,7 +14,7 @@ import jsonizer.jsonize;
 import jsonizer;
 
 /// Abstract class for exceptions that can occur when fetching base stations from the server.
-abstract class BaseStationFetchingError : Exception
+abstract class FetchingError : Exception
 {
     Status statusCode;
     this(string msg = "", Status statusCode = Status.NONE,
@@ -26,7 +26,7 @@ abstract class BaseStationFetchingError : Exception
 }
 
 /// Instantiated where there was a problem connecting to the server
-class ConnectionError : BaseStationFetchingError
+class ConnectionError : FetchingError
 {
     this(Status statusCode = SoupStatus.NONE, string file = __FILE__, size_t line = __LINE__)
     {
@@ -35,7 +35,7 @@ class ConnectionError : BaseStationFetchingError
 }
 
 /// Instantiated where an error occured on the server(status codes 500-599)
-class ServerError : BaseStationFetchingError
+class ServerError : FetchingError
 {
     this(SoupStatus statusCode = SoupStatus.NONE, string file = __FILE__, size_t line = __LINE__)
     {
@@ -48,7 +48,7 @@ class ServerError : BaseStationFetchingError
    client error(status codes 400-499 or 3xx status codes that aren't 
    just redirections) 
 */
-class ClientError : BaseStationFetchingError
+class ClientError : FetchingError
 {
     this(SoupStatus statusCode = SoupStatus.NONE, string file = __FILE__, size_t line = __LINE__)
     {
@@ -73,7 +73,7 @@ class StationFetcher
     }
 
     void fetchStations(void delegate(BaseStation[]) okCallback,
-            void delegate(BaseStationFetchingError) errCallback)
+            void delegate(FetchingError) errCallback)
     {
         Message msg = new Message("GET", url);
 
@@ -102,7 +102,7 @@ class StationFetcher
             else if (statusCode >= 500) /* Status codes higher or equal than 500
                indicate server errors */
             {
-                errCallback(new ConnectionError(statusCode));
+                errCallback(new ServerError(statusCode));
             }
 
         });
@@ -126,9 +126,9 @@ unittest
 
     auto loop = new MainLoop(new MainContext(null), true);
     auto fetcher = new StationFetcher("http://localhost:8080/radios");
-    BaseStationFetchingError err = null;
+    FetchingError err = null;
 
-    fetcher.fetchStations((BaseStation[] bs) => loop.quit(), (BaseStationFetchingError e) {
+    fetcher.fetchStations((BaseStation[] bs) => loop.quit(), (FetchingError e) {
         if (!cast(ServerError) e)
         {
             err = e;
