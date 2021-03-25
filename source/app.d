@@ -21,20 +21,6 @@ string getRandomSplash()
     return choice(splashes);
 }
 
-class MyApplication : Application
-{
-    import gtkd.Implement;
-    import gobject.c.functions : g_object_newv;
-
-    mixin ImplementClass!GtkApplication;
-
-    this()
-    {
-
-        super(null, GApplicationFlags.FLAGS_NONE);
-    }
-}
-
 class AdminConWindow : MainWindow
 {
     this()
