@@ -12,6 +12,7 @@ import gtk.TreeIter;
 import gtk.Application;
 
 import konsola_operatorska.basestation;
+import konsola_operatorska.basestation_model;
 import konsola_operatorska.basestation_treeview;
 import konsola_operatorska.assets;
 
@@ -26,7 +27,11 @@ class AdminConWindow : MainWindow
     this()
     {
         super("Konsola Operatorska: " ~ getRandomSplash());
-        auto bs_tv = new BaseStationTreeView();
+
+        auto stationModel = new BaseStationModel("http://localhost:8080/radios");
+
+        auto bs_tv = new StationTreeView(stationModel);
+
         loadResource();
         addIcons();
 

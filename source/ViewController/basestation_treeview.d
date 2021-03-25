@@ -181,9 +181,9 @@ class SignalStrengthCol: TreeViewColumn
     }
 }
 
-class BaseStationTreeView : TreeView {
+class StationTreeView : TreeView {
     BaseStationListStore listStore;
-    this() {
+    this(BaseStationModel model) {
 	appendColumn(new StationTextColumn("ID", Column.Id));
 	appendColumn(new StationTextColumn("Name", Column.Name));
 	appendColumn(new StationTypeCol());
@@ -192,10 +192,9 @@ class BaseStationTreeView : TreeView {
 	appendColumn(new BatteryLevelCol());
 	appendColumn(new StationTextColumn("Working Mode", Column.WorkingMode));
 	
-	auto model = new BaseStationModel("http://localhost:8080/radios");
-
 	auto listStore = new BaseStationListStore(model);
 	this.listStore = listStore;
+
 	setModel(listStore);
     }
 }
