@@ -7,7 +7,6 @@ import std.signals;
 import std.stdio;
 import std.format;
 
-
 import glib.Timeout;
 
 class StationWithEvents
