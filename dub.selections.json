@@ -2,7 +2,10 @@
 	"fileVersion": 1,
 	"versions": {
 		"glibd": "2.3.0",
-		"gtk-d": "~gtk4",
+		"gtk-d": {
+			"repository": "git+https://github.com/gtkd-developers/GtkD.git",
+			"version": "d62711933f1cc7e7389e97ac6ccd70bfbc1d63a9"
+		},
 		"jsonizer": "0.7.6",
 		"libshumate": "~master",
 		"silly": "1.1.1",
