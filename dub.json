@@ -11,7 +11,7 @@
 		"jsonizer": "~>0.7.6",
 		"silly": "~>1.1.1",
 		"soup": "*",
-		"libshumate": "*"
+		"shumate": "*"
 	},
 	"description": "Aplikacja na konkurs motorola science cup",
 	"dflags-dmd": [

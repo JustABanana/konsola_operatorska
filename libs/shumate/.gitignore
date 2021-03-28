@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+out
+/shumate
+libshumate.so
+libshumate.dylib
+libshumate.dll
+libshumate.a
+libshumate.lib
+libshumate-test-*
+*.exe
+*.o
+*.obj
+*.lst

@@ -1,7 +1,0 @@
-{
-	"fileVersion": 1,
-	"versions": {
-		"glibd": "2.3.0",
-		"gtk-d": "~gtk4"
-	}
-}

@@ -1,4 +1,5 @@
 {
+	"name": "shumate",
 	"dependencies": {
 		"gtk-d:gtkd": {
 			"repository": "git+https://github.com/gtkd-developers/GtkD.git",
@@ -8,7 +9,6 @@
 	"importPaths": [
 		"out"
 	],
-	"name": "libshumate",
 	"preGenerateCommands-posix": [
 		"dub fetch girtod || true",
 		"cd $PACKAGE_DIR && dub run girtod -- --use-runtime-linker"

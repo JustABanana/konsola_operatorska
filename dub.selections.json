@@ -7,7 +7,7 @@
 			"version": "d62711933f1cc7e7389e97ac6ccd70bfbc1d63a9"
 		},
 		"jsonizer": "0.7.6",
-		"libshumate": "~master",
+		"shumate": "~master",
 		"silly": "1.1.1",
 		"soup": "~master"
 	}

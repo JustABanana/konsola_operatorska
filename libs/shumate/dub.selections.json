@@ -1,0 +1,7 @@
+{
+	"fileVersion": 1,
+	"versions": {
+		"glibd": "2.3.0",
+		"gtk-d": {"version":"d62711933f1cc7e7389e97ac6ccd70bfbc1d63a9","repository":"git+https://github.com/gtkd-developers/GtkD.git"}
+	}
+}
