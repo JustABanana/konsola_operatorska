@@ -3,7 +3,7 @@ module konsola_operatorska.assets;
 
 import gio.Resource;
 import gtk.IconTheme;
-import gdk.Screen;
+import gdk.Display;
 import gtk.CssProvider;
 import gtk.StyleContext;
 import glib.Bytes;
@@ -23,12 +23,14 @@ void loadResources()
 
 void addIcons()
 {
-    IconTheme.getDefault().addResourcePath("/icons");
-    IconTheme.getDefault().addResourcePath("/");
+    IconTheme theme = IconTheme.getForDisplay(Display.getDefault());
+    theme.addResourcePath("/icons");
+    theme.addResourcePath("/");
 }
 
-void addStyles() {
+void addStyles()
+{
     CssProvider provider = new CssProvider();
     provider.loadFromResource("/custom.css");
-    StyleContext.addProviderForScreen(Screen.getDefault(), provider, 1);
+    StyleContext.addProviderForDisplay(Display.getDefault(), provider, 1);
 }

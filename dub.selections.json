@@ -2,10 +2,9 @@
 	"fileVersion": 1,
 	"versions": {
 		"glibd": "2.3.0",
-		"gtk-d": "3.9.0",
+		"gtk-d": "~gtk4",
 		"jsonizer": "0.7.6",
-		"osm_gps_map": "~master",
-		"rsvg": "~master",
+		"libshumate": "~master",
 		"silly": "1.1.1",
 		"soup": "~master"
 	}

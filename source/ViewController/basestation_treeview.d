@@ -6,7 +6,9 @@ import konsola_operatorska.utils : delegateToObjectDelegate, delegateToCallbackT
 
 import gtk.TreeView;
 import gtk.TreeViewColumn;
-import gtk.TreeModel;
+import gtk.TreeModelIF;
+import gtk.TreeModelT;
+import gtkd.Implement;
 
 import gtk.StyleContext;
 import gtk.Widget;
@@ -107,11 +109,12 @@ extern(C) {
     void stationTypeCellDataFunc(GtkTreeViewColumn* col_c, GtkCellRenderer* ren_c, GtkTreeModel* model_c, GtkTreeIter* iter_c, void* data) { 
 		    // Convert arguments from C types to D types
 		    auto ren = new CellRenderer(ren_c);
-		    auto model = new TreeModel(model_c);
+		    auto model = new ListStore(cast(GtkListStore*)model_c);
 		    auto iter = new TreeIter(iter_c);
 
-		    StationType bs_type = cast(StationType)model.getValue(iter, 2).getInt();
-
+		    Value val;
+		    model.getValue(iter, 2, val);
+		    StationType bs_type = cast(StationType)val.getInt();
 
 	        	string typeIconName;
 	        	final switch(bs_type) {

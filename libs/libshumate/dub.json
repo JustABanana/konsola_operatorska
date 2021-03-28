@@ -1,0 +1,24 @@
+{
+	"dependencies": {
+		"gtk-d:gtkd": {
+			"source": "git+https://github.com/gtkd-developers/GtkD.git",
+			"version": "~gtk4"
+		}
+	},
+	"importPaths": [
+		"out"
+	],
+	"name": "libshumate",
+	"preGenerateCommands-posix": [
+		"dub fetch girtod || true",
+		"cd $PACKAGE_DIR && dub run girtod -- --use-runtime-linker"
+	],
+	"preGenerateCommands-windows": [
+		"dub fetch girtod || VER>NUL",
+		"cd $PACKAGE_DIR && dub run girtod -- --use-runtime-linker"
+	],
+	"sourcePaths": [
+		"out"
+	],
+	"targetType": "library"
+}

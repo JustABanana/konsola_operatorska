@@ -4,11 +4,14 @@
 	],
 	"copyright": "Copyright © 2021, 0.30000000000000004",
 	"dependencies": {
-		"gtk-d": "~>3.9.0",
+		"gtk-d:gtkd": {
+			"source": "git+https://github.com/gtkd-developers/GtkD.git",
+			"version": "~gtk4"
+		},
 		"jsonizer": "~>0.7.6",
 		"silly": "~>1.1.1",
 		"soup": "*",
-		"osm_gps_map": "*"
+		"libshumate": "*"
 	},
 	"description": "Aplikacja na konkurs motorola science cup",
 	"dflags-dmd": [

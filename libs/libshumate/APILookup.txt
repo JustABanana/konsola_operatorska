@@ -1,0 +1,6 @@
+﻿wrap: shumate
+file: Shumate-0.0.gir
+
+struct: View
+	noCode: new_simple
+

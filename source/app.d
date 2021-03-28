@@ -1,11 +1,12 @@
 ///
 module konsola_operatorska.app;
 
-import gtk.MainWindow;
-import gtk.Main;
+import gtk.Window;
+import gtk.ApplicationWindow;
 import gtk.Application;
 import gtk.Box;
 import gtk.IconTheme;
+import gobject.Signals;
 
 import konsola_operatorska.assets;
 import konsola_operatorska.header;
@@ -13,13 +14,12 @@ import konsola_operatorska.basestation;
 import konsola_operatorska.basestation_model;
 import konsola_operatorska.basestation_treeview;
 import konsola_operatorska.error_triangle;
-import konsola_operatorska.mapview;
 
-class AdminConWindow : MainWindow
+class AdminConWindow : ApplicationWindow
 {
-    this()
+    this(Application app)
     {
-        super("Konsola Operatorska");
+        super(app);
 
         loadResources();
         addIcons();
@@ -30,17 +30,16 @@ class AdminConWindow : MainWindow
         auto model = new BaseStationModel("http://localhost:8080/radios");
 
         auto bs_tv = new StationTreeView(model);
-        auto smv = new StationMap(model);
 
-        box.add(bs_tv);
-        box.add(smv);
-        add(box);
+        box.append(bs_tv);
+        this.setChild(box);
 
         auto header = new Header(model);
         setTitlebar(header);
 
         setDefaultSize(0, 600);
-        showAll();
+        this.show();
+        box.show();
 
     }
 }
@@ -53,8 +52,8 @@ else
 {
     void main(string[] args)
     {
-        Main.init(args);
-        AdminConWindow win = new AdminConWindow();
-        Main.run();
+        Application app = new Application(null, GApplicationFlags.FLAGS_NONE);
+        Signals.connect(app, "activate", () => new AdminConWindow(app));
+        app.run(args);
     }
 }

@@ -9,7 +9,8 @@ import std.string;
 import std.random;
 
 import gtk.HeaderBar;
-
+import gtk.Label;
+import gtk.Box;
 
 string getRandomSplash()
 {
@@ -17,14 +18,15 @@ string getRandomSplash()
     return choice(splashes);
 }
 
-class Header : HeaderBar {
-	this(BaseStationModel model) {
-		super();
-		packStart(new ErrorTriangle(model));
-		
+class Header : HeaderBar
+{
+    this(BaseStationModel model)
+    {
+        super();
+        packStart(new ErrorTriangle(model));
 
-		setTitle("Konsola Operatorska");
-		setSubtitle(getRandomSplash());
-		setShowCloseButton(true);
-	}
+        this.setTitleWidget(new Label("Konsola Operatorska"));
+        //	setSubtitle(getRandomSplash());
+        setShowTitleButtons(true);
+    }
 }
