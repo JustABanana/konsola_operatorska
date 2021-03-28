@@ -1,7 +1,7 @@
-module konsola_operatorska.basestation_treeview;
+module konsola_operatorska.view_controller.treeview;
 
-import konsola_operatorska.basestation;
-import konsola_operatorska.basestation_model;
+import konsola_operatorska.station;
+import konsola_operatorska.model.stations;
 import konsola_operatorska.utils : delegateToObjectDelegate, delegateToCallbackTuple;
 
 import gtk.TreeView;
@@ -35,14 +35,14 @@ enum Column
     WorkingMode = 6
 }
 
-/// Pseudo model for using the basestation_model with GTK's tree view
-class BaseStationListStore : ListStore
+/// Pseudo model for using the station model with GTK's tree view
+class StationListStore : ListStore
 {
-    BaseStationModel model;
+    StationModel model;
 
-    this(BaseStationModel model)
+    this(StationModel model)
     {
-        // Mapping of basestation fields to GTypes
+        // Mapping of station fields to GTypes
         // dfmt off
         super([
                 GType.INT, //Id
@@ -65,17 +65,17 @@ class BaseStationListStore : ListStore
 
     void onStationAdded(StationWithEvents stationEvent) {
 	auto iter = this.createIter();
-	setBaseStationRow(iter,stationEvent.station);
+	setStationRow(iter,stationEvent.station);
 
 	stationEvent.Changed.connect(delegateToObjectDelegate({
-		this.setBaseStationRow(iter, stationEvent.station);
+		this.setStationRow(iter, stationEvent.station);
 	    }));
 	stationEvent.Removed.connect(delegateToObjectDelegate({
 		this.remove(iter);
 	    }));
     }
 
-    void setBaseStationRow(TreeIter iter, BaseStation bs) {
+    void setStationRow(TreeIter iter, Station bs) {
 		setValue(iter, Column.Id, bs.id);
 		setValue(iter, Column.Name, bs.name);
 		setValue(iter, Column.Type, bs.type);
@@ -185,8 +185,8 @@ class SignalStrengthCol: TreeViewColumn
 }
 
 class StationTreeView : TreeView {
-    BaseStationListStore listStore;
-    this(BaseStationModel model) {
+    StationListStore listStore;
+    this(StationModel model) {
 	appendColumn(new StationTextColumn("ID", Column.Id));
 	appendColumn(new StationTextColumn("Name", Column.Name));
 	appendColumn(new StationTypeCol());
@@ -195,7 +195,7 @@ class StationTreeView : TreeView {
 	appendColumn(new BatteryLevelCol());
 	appendColumn(new StationTextColumn("Working Mode", Column.WorkingMode));
 	
-	auto listStore = new BaseStationListStore(model);
+	auto listStore = new StationListStore(model);
 	this.listStore = listStore;
 
 	setModel(listStore);

@@ -1,6 +1,6 @@
-module konsola_operatorska.error_triangle;
+module konsola_operatorska.view_controller.error_triangle;
 
-import konsola_operatorska.basestation_model;
+import konsola_operatorska.model.stations;
 
 import gtk.Image;
 import gtk.IconTheme;
@@ -9,8 +9,8 @@ import gdk.Display;
 
 class ErrorTriangle : Image
 {
-    BaseStationModel model;
-    this(BaseStationModel model)
+    StationModel model;
+    this(StationModel model)
     {
         auto icon = IconTheme.getForDisplay(Display.getDefault()).lookupIcon("exclamation-triangle-symbolic",
                 [], 128, 1, GtkTextDirection.LTR, GtkIconLookupFlags.PRELOAD);

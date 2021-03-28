@@ -9,11 +9,12 @@ import gtk.IconTheme;
 import gobject.Signals;
 
 import konsola_operatorska.assets;
-import konsola_operatorska.header;
-import konsola_operatorska.basestation;
-import konsola_operatorska.basestation_model;
-import konsola_operatorska.basestation_treeview;
-import konsola_operatorska.error_triangle;
+import konsola_operatorska.station;
+
+import konsola_operatorska.model.stations;
+
+import konsola_operatorska.view_controller.treeview;
+import konsola_operatorska.view_controller.header;
 
 class AdminConWindow : ApplicationWindow
 {
@@ -27,11 +28,11 @@ class AdminConWindow : ApplicationWindow
 
         Box box = new Box(GtkOrientation.HORIZONTAL, 10);
 
-        auto model = new BaseStationModel("http://localhost:8080/radios");
+        auto model = new StationModel("http://localhost:8080/radios");
 
-        auto bs_tv = new StationTreeView(model);
+        auto s_tv = new StationTreeView(model);
 
-        box.append(bs_tv);
+        box.append(s_tv);
         this.setChild(box);
 
         auto header = new Header(model);

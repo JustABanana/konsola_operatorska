@@ -1,7 +1,8 @@
-module konsola_operatorska.basestation_model;
+module konsola_operatorska.model.stations;
 
-import konsola_operatorska.basestation;
+import konsola_operatorska.station;
 import konsola_operatorska.station_fetcher;
+
 public import konsola_operatorska.station_fetcher : FetchingError,
     ConnectionError, ServerError, ClientError;
 
@@ -13,18 +14,18 @@ import glib.Timeout;
 
 class StationWithEvents
 {
-    BaseStation station;
+    Station station;
     mixin Signal!() Changed;
     mixin Signal!() Removed;
-    this(BaseStation station)
+    this(Station station)
     {
         this.station = station;
     }
 }
 
-class BaseStationModel
+class StationModel
 {
-    /// Map of basestation id to basestations
+    /// Map of station id to station 
     StationWithEvents[int] stations;
     StationFetcher fetcher;
 
@@ -38,7 +39,7 @@ class BaseStationModel
 
         // Start fetching and updating the model
         new Timeout(5000, {
-            this.fetcher.fetchStations((BaseStation[] bs) {
+            this.fetcher.fetchStations((Station[] bs) {
                 this.updateItems(bs);
                 this.FetchingSucessful.emit();
             }, (FetchingError e) { this.FetchingFailed.emit(e); });
@@ -46,7 +47,7 @@ class BaseStationModel
         }, true);
     }
 
-    void updateItems(BaseStation[] stations)
+    void updateItems(Station[] stations)
     {
         StationWithEvents[int] oldStations = this.stations;
         StationWithEvents[int] newStations;

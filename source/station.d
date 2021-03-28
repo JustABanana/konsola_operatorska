@@ -1,5 +1,5 @@
 /// 
-module konsola_operatorska.basestation;
+module konsola_operatorska.station;
 
 import std.stdio;
 import std.json;
@@ -36,9 +36,9 @@ struct Position
 Example station serialized as json
 {"Id":1,"Name":"KR 1","Type":"Portable","SerialNumber":"4686-4706-1775-00001","Strength":1,"BatteryLevel":25,"WorkingMode":"Idle","Position":{"Lat":"50.06528","Lon":"19.95947"}}
 */
-/** A struct representing the base station as sent to us by the server, 
+/** A struct representing the station as sent to us by the server, 
     deserialized from json */
-struct BaseStation
+struct Station
 {
     mixin JsonizeMe;
     @jsonize("Id") int id;
@@ -52,14 +52,14 @@ struct BaseStation
 }
 
 /// Example usage with the jsonize.fromJSONString function
-@("BaseStation correctly deserializes from json")
+@("Station correctly deserializes from json")
 unittest
 {
     import std.math : approxEqual;
 
     string jsonStr = `{"Id":1,"Name":"KR 1","Type":"Portable","SerialNumber":"4686-4706-1775-00001","Strength":1,"BatteryLevel":25,"WorkingMode":"Voice","Position":{"Lat":"50.06528","Lon":"19.95947"}}`;
 
-    BaseStation bs = fromJSONString!BaseStation(jsonStr);
+    auto bs = fromJSONString!Station(jsonStr);
     assert(bs.id == 1);
     assert(bs.name == "KR 1");
     assert(bs.type == StationType.Portable);

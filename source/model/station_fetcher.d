@@ -1,7 +1,7 @@
 /// Module responsible for fetching the data from the server
 module konsola_operatorska.station_fetcher;
 
-import konsola_operatorska.basestation;
+import konsola_operatorska.station;
 
 import std.format;
 
@@ -13,7 +13,7 @@ import jsonizer.fromjson;
 import jsonizer.jsonize;
 import jsonizer;
 
-/// Abstract class for exceptions that can occur when fetching base stations from the server.
+/// Abstract class for exceptions that can occur when fetching stations from the server.
 abstract class FetchingError : Exception
 {
     Status statusCode;
@@ -72,8 +72,7 @@ class StationFetcher
         this.sess = new Session();
     }
 
-    void fetchStations(void delegate(BaseStation[]) okCallback,
-            void delegate(FetchingError) errCallback)
+    void fetchStations(void delegate(Station[]) okCallback, void delegate(FetchingError) errCallback)
     {
         Message msg = new Message("GET", url);
 
@@ -85,7 +84,7 @@ class StationFetcher
             if (statusCode >= 200 && statusCode < 300) // Everything is ok!
             {
                 string jsonStr = m.responseBody.data();
-                BaseStation[] stations = fromJSONString!(BaseStation[])(jsonStr);
+                Station[] stations = fromJSONString!(Station[])(jsonStr);
                 okCallback(stations);
             }
             else if (statusCode > 0 && statusCode < 100) /* Status codes in the range of 1-100 are used 
@@ -128,7 +127,7 @@ unittest
     auto fetcher = new StationFetcher("http://localhost:8080/radios");
     FetchingError err = null;
 
-    fetcher.fetchStations((BaseStation[] bs) => loop.quit(), (FetchingError e) {
+    fetcher.fetchStations((Station[] bs) => loop.quit(), (FetchingError e) {
         if (!cast(ServerError) e)
         {
             err = e;

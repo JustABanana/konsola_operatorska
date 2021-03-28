@@ -1,9 +1,8 @@
 /// Moduel defining apps headerbar
-module konsola_operatorska.header;
+module konsola_operatorska.view_controller.header;
 
-import konsola_operatorska.error_triangle;
-import konsola_operatorska.basestation_model;
-import konsola_operatorska.error_triangle;
+import konsola_operatorska.view_controller.error_triangle;
+import konsola_operatorska.model.stations;
 
 import std.string;
 import std.random;
@@ -20,7 +19,7 @@ string getRandomSplash()
 
 class Header : HeaderBar
 {
-    this(BaseStationModel model)
+    this(StationModel model)
     {
         super();
         packStart(new ErrorTriangle(model));
