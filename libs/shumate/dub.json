@@ -11,14 +11,15 @@
 	],
 	"preGenerateCommands-posix": [
 		"dub fetch girtod || true",
-		"cd $PACKAGE_DIR && dub run girtod -- --use-runtime-linker"
+		"cd $PACKAGE_DIR && dub run girtod"
 	],
 	"preGenerateCommands-windows": [
 		"dub fetch girtod || VER>NUL",
-		"cd $PACKAGE_DIR && dub run girtod -- --use-runtime-linker"
+		"cd $PACKAGE_DIR && dub run girtod"
 	],
 	"sourcePaths": [
 		"out"
 	],
+	"libs": ["shumate-0.0"],
 	"targetType": "library"
 }
