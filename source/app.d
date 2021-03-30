@@ -13,8 +13,9 @@ import konsola_operatorska.station;
 
 import konsola_operatorska.model.stations;
 
-import konsola_operatorska.view_controller.treeview;
+import konsola_operatorska.view_controller.map;
 import konsola_operatorska.view_controller.header;
+import konsola_operatorska.view_controller.treeview;
 
 class AdminConWindow : ApplicationWindow
 {
@@ -26,22 +27,27 @@ class AdminConWindow : ApplicationWindow
         addIcons();
         addStyles();
 
-        Box box = new Box(GtkOrientation.HORIZONTAL, 10);
+        auto box = new Box(GtkOrientation.VERTICAL, 3);
 
         auto model = new StationModel("http://localhost:8080/radios");
 
         auto s_tv = new StationTreeView(model);
+        auto map = new Mapview(model);
 
         box.append(s_tv);
+        map.setValign(GtkAlign.FILL);
+
+        box.append(map);
         this.setChild(box);
 
         auto header = new Header(model);
         setTitlebar(header);
+        this.setDefaultSize(800, 600);
 
-        setDefaultSize(0, 600);
+        this.maximize();
+
         this.show();
         box.show();
-
     }
 }
 

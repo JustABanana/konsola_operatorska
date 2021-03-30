@@ -10,11 +10,20 @@
 		},
 		"jsonizer": "~>0.7.6",
 		"silly": "~>1.1.1",
-		"soup": "*",
-		"shumate": "*"
+		"soup": {
+			"path": "./libs/soup",
+			"version": "*"
+		},
+		"shumate": {
+			"path": "./libs/shumate",
+			"version": "*"
+		}
 	},
 	"description": "Aplikacja na konkurs motorola science cup",
 	"dflags-dmd": [
+		"-J=."
+	],
+	"dflags-ldc": [
 		"-J=."
 	],
 	"preGenerateCommands-posix": [
@@ -32,6 +41,7 @@
 			"name": "unittest"
 		}
 	],
+	"libs": ["shumate-0.0"],
 	"license": "proprietary",
 	"name": "konsola_operatorska"
 }

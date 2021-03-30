@@ -2,5 +2,5 @@
 file: Shumate-0.0.gir
 
 struct: View
-	noCode: new_simple
+	move: new_simple create_simple
 

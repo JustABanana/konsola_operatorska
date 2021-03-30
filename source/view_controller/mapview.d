@@ -1,30 +1,31 @@
 module konsola_operatorska.view_controller.map;
-import konsola_operatorska.basestation_model;
-class ErrorTriangle : Image
+import konsola_operatorska.model.stations;
+import shumate.View;
+import shumate.Scale;
+import shumate.MapLayer;
+import shumate.MapSourceFactory;
+
+import std.stdio;
+
+class Mapview : View
 {
-    BaseStationModel model;
-    this(BaseStationModel model)
+    StationModel model;
+    this(StationModel model)
     {
-
+        super();
         this.model = model;
-        model.FetchingSucessful.connect(&this.onFetchSuccessful);
-        model.FetchingFailed.connect(&this.onFetchFailed);
 
-        StyleContext sc = this.getStyleContext();
-        sc.addClass("error-triangle");
+        auto viewport = this.getViewport();
+        auto sourceFactory = MapSourceFactory.dupDefault();
 
-    }
+        auto mapSource = sourceFactory.createCachedSource("osm-mapnik");
+        mapSource.setNextSource(null);
+        viewport.setReferenceMapSource(mapSource);
+        viewport.setMinZoomLevel(2);
 
-    void onFetchSuccessful()
-    {
-        this.hide();
-    }
+        auto layer = new MapLayer(mapSource, viewport);
+        this.setVexpand(true);
 
-    void onFetchFailed(FetchingError e)
-    {
-        this.show();
-
-        this.setTooltipText(e.msg);
-        this.setHasTooltip(true);
+        this.addLayer(layer);
     }
 }
