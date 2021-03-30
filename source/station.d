@@ -23,6 +23,17 @@ enum StationType
     BaseStation,
 }
 
+string stationTypeToIconName(StationType type) {
+	        	final switch(type) {
+	        	    case StationType.Portable:
+				return "mobile-symbolic";
+	        	    case StationType.Car:
+	        		return "truck-symbolic";
+	        	    case StationType.BaseStation:
+	        		return "broadcast-tower-symbolic";
+	        	}
+}
+
 /** Simple position struct containing the lattitude and the longitude. 
     Can be serialized and deserialized with jsonizer. */
 struct Position

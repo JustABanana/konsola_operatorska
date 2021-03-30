@@ -3,4 +3,9 @@ file: Shumate-0.0.gir
 
 struct: View
 	move: new_simple create_simple
+struct: Marker
+	noCode: animate_out_with_delay
+	noCode: animate_in_with_delay
+	noCode: animate_in
+	noCode: animate_out
 

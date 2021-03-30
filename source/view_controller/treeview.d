@@ -64,11 +64,6 @@ class StationListStore : ListStore
 
 
 	model.StationAdded.connect(&this.onStationAdded);
-	model.SelectionChanged.connect(&this.onSelectionChanged);
-    }
-
-    void onSelectionChanged(Nullable!StationWithEvents selectedStation) {
-	writeln(selectedStation);
     }
 
     void onStationAdded(StationWithEvents stationEvent) {
@@ -122,21 +117,10 @@ extern(C) {
 
 		    Value val;
 		    model.getValue(iter, Column.Type, val);
-		    StationType bs_type = cast(StationType)val.getInt();
 
-	        	string typeIconName;
-	        	final switch(bs_type) {
-	        	    case StationType.Portable:
-				typeIconName = "mobile-symbolic";
-				break;
-	        	    case StationType.Car:
-	        		typeIconName = "truck-symbolic";
-	        		break;
-	        	    case StationType.BaseStation:
-	        		typeIconName = "broadcast-tower-symbolic";
-				break;
-	        	}
-		    ren.setProperty("icon-name", typeIconName);
+		    StationType stationType = cast(StationType)val.getInt();
+
+		    ren.setProperty("icon-name", stationTypeToIconName(stationType));
 	}
 }
 
