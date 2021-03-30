@@ -18,10 +18,12 @@ import gtk.CellRendererText;
 import gtk.CellRendererPixbuf;
 import gtk.CellRendererProgress;
 import gtk.ListStore;
+import gtk.TreeSelection;
 import gtk.TreeIter;
 
 import std.stdio;
 import std.meta;
+import std.typecons;
 import std.conv;
 
 enum Column
@@ -60,7 +62,13 @@ class StationListStore : ListStore
 	    this.onStationAdded(station);
 	}
 
+
 	model.StationAdded.connect(&this.onStationAdded);
+	model.SelectionChanged.connect(&this.onSelectionChanged);
+    }
+
+    void onSelectionChanged(Nullable!StationWithEvents selectedStation) {
+	writeln(selectedStation);
     }
 
     void onStationAdded(StationWithEvents stationEvent) {
@@ -113,7 +121,7 @@ extern(C) {
 		    auto iter = new TreeIter(iter_c);
 
 		    Value val;
-		    model.getValue(iter, 2, val);
+		    model.getValue(iter, Column.Type, val);
 		    StationType bs_type = cast(StationType)val.getInt();
 
 	        	string typeIconName;
@@ -186,7 +194,9 @@ class SignalStrengthCol: TreeViewColumn
 
 class StationTreeView : TreeView {
     StationListStore listStore;
+    StationModel stationModel;
     this(StationModel model) {
+	this.stationModel = model;
 	appendColumn(new StationTextColumn("ID", Column.Id));
 	appendColumn(new StationTextColumn("Name", Column.Name));
 	appendColumn(new StationTypeCol());
@@ -194,9 +204,28 @@ class StationTreeView : TreeView {
 	appendColumn(new SignalStrengthCol());
 	appendColumn(new BatteryLevelCol());
 	appendColumn(new StationTextColumn("Working Mode", Column.WorkingMode));
+
 	
 	auto listStore = new StationListStore(model);
 	this.listStore = listStore;
+
+	this.getSelection().addOnChanged((TreeSelection sel) {
+		TreeIter iter; 
+		TreeModelIF model;
+
+		sel.getSelected(model, iter);
+		if(iter) {
+		    Value val;
+		    model.getValue(iter, Column.Id, val);
+		    int id = val.getInt();
+		    // We want to crash if idToStation returns null, since that means our local model has been broken
+		    StationWithEvents station = this.stationModel.idToStation(id).get();
+
+		    this.stationModel.SelectionChanged.emit(station.nullable);
+		} else {
+		    this.stationModel.SelectionChanged.emit(cast(Nullable!StationWithEvents)null);
+		    }
+	});
 
 	setModel(listStore);
     }
