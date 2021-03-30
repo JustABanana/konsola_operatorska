@@ -9,12 +9,14 @@ public import konsola_operatorska.station_fetcher : FetchingError,
 import std.signals;
 import std.stdio;
 import std.format;
+import std.typecons;
 
 import glib.Timeout;
 
 class StationWithEvents
 {
     Station station;
+    alias station this;
     mixin Signal!() Changed;
     mixin Signal!() Removed;
     this(Station station)
@@ -28,6 +30,7 @@ class StationModel
     /// Map of station id to station 
     StationWithEvents[int] stations;
     StationFetcher fetcher;
+    Nullable!StationWithEvents currentSelection;
 
     /***********************************
          * Params:
@@ -47,6 +50,28 @@ class StationModel
         }, true);
     }
 
+    Nullable!StationWithEvents idToStation(int id) {
+        if (auto station = id in this.stations) {
+            return (*station).nullable;
+        }
+        else
+        {
+            return cast(Nullable!StationWithEvents)null;
+        }
+        
+    }
+    Nullable!StationWithEvents stationToStationWithEvents(Station station) {
+        return idToStation(station.id);        
+    }
+
+    void changeSelection(Nullable!Station station) {
+        if(!station.isNull) {
+            this.SelectionChanged.emit(stationToStationWithEvents(station.get).nullable);
+        } else {
+            this.SelectionChanged.emit(cast(Nullable!StationWithEvents)null);
+        }
+    }
+
     void updateItems(Station[] stations)
     {
         StationWithEvents[int] oldStations = this.stations;
@@ -54,7 +79,6 @@ class StationModel
 
         foreach (newStation; stations)
         {
-
             if (auto oldStation = newStation.id in oldStations)
             {
                 newStations[newStation.id] = *oldStation;
@@ -65,7 +89,7 @@ class StationModel
 
                 /* Removing all items that were moved to the new map
 		   so we know that the remaining ones were removed */
-                oldStations.remove(oldStation.station.id);
+                oldStations.remove(oldStation.id);
             }
             else
             {
@@ -85,6 +109,8 @@ class StationModel
     }
 
     mixin Signal!(StationWithEvents) StationAdded;
+
+    mixin Signal!(Nullable!StationWithEvents) SelectionChanged;
 
     mixin Signal!() FetchingSucessful;
     mixin Signal!(FetchingError) FetchingFailed;

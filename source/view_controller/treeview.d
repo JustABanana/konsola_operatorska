@@ -65,10 +65,10 @@ class StationListStore : ListStore
 
     void onStationAdded(StationWithEvents stationEvent) {
 	auto iter = this.createIter();
-	setStationRow(iter,stationEvent.station);
+	setStationRow(iter,stationEvent);
 
 	stationEvent.Changed.connect(delegateToObjectDelegate({
-		this.setStationRow(iter, stationEvent.station);
+		this.setStationRow(iter, stationEvent);
 	    }));
 	stationEvent.Removed.connect(delegateToObjectDelegate({
 		this.remove(iter);
