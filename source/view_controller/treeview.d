@@ -37,60 +37,6 @@ enum Column
     WorkingMode = 6
 }
 
-/// Pseudo model for using the station model with GTK's tree view
-class StationListStore : ListStore
-{
-    StationModel model;
-
-    this(StationModel model)
-    {
-        // Mapping of station fields to GTypes
-        // dfmt off
-        super([
-                GType.INT, //Id
-		GType.STRING, //Name
-		GType.INT, //Type - enum as an int
-		GType.STRING, //SerialNumber
-		GType.INT, //Strength - Times 10, to get strength as a percentage
-                GType.INT, //BatteryLevel
-		GType.STRING, //WorkingMode
-        ]);
-
-	this.model = model;
-
-	foreach(station; model.stations.values()) {
-	    this.onStationAdded(station);
-	}
-
-
-	model.StationAdded.connect(&this.onStationAdded);
-    }
-
-    void onStationAdded(StationWithEvents stationEvent) {
-	auto iter = this.createIter();
-	setStationRow(iter,stationEvent);
-
-	stationEvent.Changed.connect(delegateToObjectDelegate({
-		this.setStationRow(iter, stationEvent);
-	    }));
-	stationEvent.Removed.connect(delegateToObjectDelegate({
-		this.remove(iter);
-	    }));
-    }
-
-    void setStationRow(TreeIter iter, Station bs) {
-		setValue(iter, Column.Id, bs.id);
-		setValue(iter, Column.Name, bs.name);
-		setValue(iter, Column.Type, bs.type);
-		setValue(iter, Column.Serial, bs.serialNumber);
-		setValue(iter, Column.Strength, bs.strength*10); // Times 10, to get strength as a percentage
-		setValue(iter, Column.BatteryLevel, bs.batteryLevel);
-		setValue(iter, Column.WorkingMode, bs.workingMode.to!string);
-
-    }
-
-}
-
 class StationTextColumn : TreeViewColumn
 {
 	CellRendererText cellRendererText;
@@ -197,20 +143,88 @@ class StationTreeView : TreeView {
 		TreeIter iter; 
 		TreeModelIF model;
 
-		sel.getSelected(model, iter);
-		if(iter) {
+		if(sel.getSelected(model, iter))
+		{
 		    Value val;
 		    model.getValue(iter, Column.Id, val);
 		    int id = val.getInt();
-		    // We want to crash if idToStation returns null, since that means our local model has been broken
-		    StationWithEvents station = this.stationModel.idToStation(id).get();
 
-		    this.stationModel.SelectionChanged.emit(station.nullable);
-		} else {
-		    this.stationModel.SelectionChanged.emit(cast(Nullable!StationWithEvents)null);
-		    }
+		    Station* station = id in this.stationModel.stations;
+		    // We want to crash if station is null, since that means our local model is broken
+		    assert(station);
+
+		    this.stationModel.SelectionChanged.emit((*station).nullable);
+		} else 
+		{
+		    this.stationModel.SelectionChanged.emit(Nullable!Station.init);
+		}
 	});
 
 	setModel(listStore);
     }
+}
+
+/// Pseudo model for using the station model with GTK's tree view
+class StationListStore : ListStore
+{
+    StationModel model;
+    TreeIter[int] idToIter;
+
+    this(StationModel model)
+    {
+        // Mapping of station fields to GTypes
+        // dfmt off
+        super([
+                GType.INT, //Id
+		GType.STRING, //Name
+		GType.INT, //Type - enum as an int
+		GType.STRING, //SerialNumber
+		GType.INT, //Strength - Times 10, to get strength as a percentage
+                GType.INT, //BatteryLevel
+		GType.STRING, //WorkingMode
+        ]);
+
+	this.model = model;
+
+	model.StationAdded.connect(&this.onStationAdded);
+	model.StationChanged.connect(&this.onStationChanged);
+	model.StationRemoved.connect(&this.onStationRemoved);
+
+	foreach(station; model.stations.values()) {
+	    this.onStationAdded(station);
+	}
+    }
+
+    void onStationAdded(Station station) {
+	auto iter = this.createIter();
+	this.idToIter[station.id] = iter;
+	setStationRow(iter,station);
+    }
+
+    void onStationChanged(Station station) {
+            if (auto iter = station.id in this.idToIter)
+	    {
+		this.setStationRow(*iter, station);
+	    }
+    }
+
+    void onStationRemoved(Station station) {
+            if (auto iter = station.id in this.idToIter)
+	    {
+		this.remove(*iter);
+		this.idToIter.remove(station.id);
+	    }
+    }
+
+    void setStationRow(TreeIter iter, Station station) {
+		setValue(iter, Column.Id, station.id);
+		setValue(iter, Column.Name, station.name);
+		setValue(iter, Column.Type, station.type);
+		setValue(iter, Column.Serial, station.serialNumber);
+		setValue(iter, Column.Strength, station.strength*10); // Times 10, to get strength as a percentage
+		setValue(iter, Column.BatteryLevel, station.batteryLevel);
+		setValue(iter, Column.WorkingMode, station.workingMode.to!string);
+
+    }
+
 }

@@ -13,24 +13,12 @@ import std.typecons;
 
 import glib.Timeout;
 
-class StationWithEvents
-{
-    Station station;
-    alias station this;
-    mixin Signal!() Changed;
-    mixin Signal!() Removed;
-    this(Station station)
-    {
-        this.station = station;
-    }
-}
-
 class StationModel
 {
     /// Map of station id to station 
-    StationWithEvents[int] stations;
+    Station[int] stations;
     StationFetcher fetcher;
-    Nullable!StationWithEvents currentSelection;
+    Nullable!Station currentSelection;
 
     /***********************************
          * Params:
@@ -50,41 +38,23 @@ class StationModel
         }, true);
     }
 
-    Nullable!StationWithEvents idToStation(int id) {
-        if (auto station = id in this.stations) {
-            return (*station).nullable;
-        }
-        else
-        {
-            return cast(Nullable!StationWithEvents)null;
-        }
-        
-    }
-    Nullable!StationWithEvents stationToStationWithEvents(Station station) {
-        return idToStation(station.id);        
-    }
-
     void changeSelection(Nullable!Station station) {
-        if(!station.isNull) {
-            this.SelectionChanged.emit(stationToStationWithEvents(station.get).nullable);
-        } else {
-            this.SelectionChanged.emit(cast(Nullable!StationWithEvents)null);
-        }
+        this.SelectionChanged.emit(station);
     }
 
-    void updateItems(Station[] stations)
+    void updateItems(Station[] newStations)
     {
-        StationWithEvents[int] oldStations = this.stations;
-        StationWithEvents[int] newStations;
+        Station[int] oldStations = this.stations;
+        Station[int] newStationsMember;
 
-        foreach (newStation; stations)
+        foreach (newStation; newStations)
         {
             if (auto oldStation = newStation.id in oldStations)
             {
-                newStations[newStation.id] = *oldStation;
-                if (newStation != oldStation.station)
+                newStationsMember[newStation.id] = *oldStation;
+                if (newStation != *oldStation)
                 {
-                    oldStation.Changed.emit();
+                    this.StationChanged.emit(newStation);
                 }
 
                 /* Removing all items that were moved to the new map
@@ -93,24 +63,25 @@ class StationModel
             }
             else
             {
-                auto newStationEvents = new StationWithEvents(newStation);
-                newStations[newStation.id] = newStationEvents;
-                StationAdded.emit(newStationEvents);
+                newStationsMember[newStation.id] = newStation;
+                this.StationAdded.emit(newStation);
             }
         }
 
         // Remove remaining iters
         foreach (removedStation; oldStations.values())
         {
-            removedStation.Removed.emit();
+            this.StationRemoved.emit(removedStation);
         }
 
-        this.stations = newStations;
+        this.stations = newStationsMember;
     }
 
-    mixin Signal!(StationWithEvents) StationAdded;
+    mixin Signal!(Station) StationAdded;
+    mixin Signal!(Station) StationChanged;
+    mixin Signal!(Station) StationRemoved;
 
-    mixin Signal!(Nullable!StationWithEvents) SelectionChanged;
+    mixin Signal!(Nullable!Station) SelectionChanged;
 
     mixin Signal!() FetchingSucessful;
     mixin Signal!(FetchingError) FetchingFailed;

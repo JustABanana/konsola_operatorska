@@ -8,31 +8,29 @@ import shumate.View;
 import shumate.Scale;
 import shumate.Marker;
 import shumate.MapLayer;
+import shumate.MapSourceChain;
 import shumate.MarkerLayer;
 import shumate.MapSourceFactory;
 
 import std.stdio;
 
 class StationMarker : Marker {
-    StationWithEvents station;
-    this(StationWithEvents station)
+    Station station;
+    StationType type;
+    Image img;
+    this(Station station)
     {
         super();
 
-        Image image = new Image();
-        image.setFromIconName(stationTypeToIconName(station.type));
-        this.setChild(image);
+        this.img = new Image();
+        this.setChild(this.img);
 
-        this.station = station;
+        this.updateStation(station);
+    }
+
+    void updateStation(Station station) {
         this.setLocation(station.position.lat, station.position.lon);
-    }
-
-    void onStationChanged(StationWithEvents station) {
-
-    }
-
-    void onStationRemoved() {
-
+        this.img.setFromIconName(stationTypeToIconName(station.type));
     }
 }
 
@@ -40,6 +38,7 @@ class Mapview : View
 {
     StationModel model;
     MarkerLayer markerLayer;
+    StationMarker[int] idToMarker;
     this(StationModel model)
     {
         super();
@@ -47,7 +46,6 @@ class Mapview : View
 
         auto viewport = this.getViewport();
         auto sourceFactory = MapSourceFactory.dupDefault();
-
 
         auto mapSource = sourceFactory.createCachedSource("osm-mapnik");
 
@@ -61,10 +59,23 @@ class Mapview : View
         this.addLayer(markerLayer);
 
 	model.StationAdded.connect(&this.onStationAdded);
+        model.StationChanged.connect(&this.onStationChanged);
     }
 
-    void onStationAdded(StationWithEvents station) {
+    void onStationAdded(Station station) {
         auto marker = new StationMarker(station);
+        this.idToMarker[station.id] = marker;
+
         this.markerLayer.addMarker(marker);
+    }
+
+    void onStationChanged(Station station) {
+        this.idToMarker[station.id].updateStation(station);
+    }
+
+    void onStationRemoved(Station station) {
+        auto marker = this.idToMarker[station.id];
+        this.markerLayer.removeMarker(marker);
+        this.idToMarker.remove(station.id);
     }
 }
