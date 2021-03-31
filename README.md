@@ -45,6 +45,8 @@ dub build
 komenda musi zostać uruchomiona dwa razy z powodu buga w dub
 
 ## Dokumentacja
+Dokumentacja dostępna jest też pod adresem [0.30000000000000004.xyz](https://0.30000000000000004.xyz/)
+
 Używamy generatora dokumentacji [adrdox](https://github.com/adamdruppe/adrdox)
 
 Do generowania dokumentacji służy komenda
