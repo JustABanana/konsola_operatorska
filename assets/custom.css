@@ -1,3 +1,21 @@
 .error-triangle {
 	color: @warning_color;
 }
+
+.selected-station {
+	padding: 1px;
+	border: 3px solid black;
+	border-radius: 100rem;
+}
+
+.station-status-0  { color: mix(red, green, 1.0); }
+.station-status-1  { color: mix(red, green, 0.9); }
+.station-status-2  { color: mix(red, green, 0.8); }
+.station-status-3  { color: mix(red, green, 0.7); }
+.station-status-4  { color: mix(red, green, 0.6); }
+.station-status-5  { color: mix(red, green, 0.5); }
+.station-status-6  { color: mix(red, green, 0.4); }
+.station-status-7  { color: mix(red, green, 0.3); }
+.station-status-8  { color: mix(red, green, 0.2); }
+.station-status-9  { color: mix(red, green, 0.1); }
+.station-status-10 { color: mix(red, green, 0.0); }

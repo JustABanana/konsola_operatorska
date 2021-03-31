@@ -51,7 +51,7 @@ class StationModel
         {
             if (auto oldStation = newStation.id in oldStations)
             {
-                newStationsMember[newStation.id] = *oldStation;
+                newStationsMember[newStation.id] = newStation;
                 if (newStation != *oldStation)
                 {
                     this.StationChanged.emit(newStation);

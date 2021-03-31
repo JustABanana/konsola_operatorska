@@ -4,6 +4,8 @@ import konsola_operatorska.station;
 
 import gtk.Image;
 
+import gtkd.Implement;
+
 import shumate.View;
 import shumate.Scale;
 import shumate.Marker;
@@ -12,17 +14,20 @@ import shumate.MapSourceChain;
 import shumate.MarkerLayer;
 import shumate.MapSourceFactory;
 
+import std.conv;
 import std.stdio;
+import std.typecons;
 
 class StationMarker : Marker {
     Station station;
-    StationType type;
     Image img;
+
     this(Station station)
     {
         super();
 
         this.img = new Image();
+        this.img.setIconSize(GtkIconSize.LARGE);
         this.setChild(this.img);
 
         this.updateStation(station);
@@ -30,7 +35,20 @@ class StationMarker : Marker {
 
     void updateStation(Station station) {
         this.setLocation(station.position.lat, station.position.lon);
+
         this.img.setFromIconName(stationTypeToIconName(station.type));
+
+        auto context = this.getStyleContext();
+        foreach (i; 0 .. 10) {
+            context.removeClass("station-status-"~i.to!string);
+        }
+            context.addClass("station-status-"~(station.calcStationHealth()/10).to!string);
+    }
+
+    void setSelected(bool selected) {
+        auto context = this.getStyleContext();
+        if(selected) context.addClass("selected-station");
+        else context.removeClass("selected-station");
     }
 }
 
@@ -39,6 +57,9 @@ class Mapview : View
     StationModel model;
     MarkerLayer markerLayer;
     StationMarker[int] idToMarker;
+
+    Nullable!StationMarker currentSelection;
+
     this(StationModel model)
     {
         super();
@@ -60,6 +81,7 @@ class Mapview : View
 
 	model.StationAdded.connect(&this.onStationAdded);
         model.StationChanged.connect(&this.onStationChanged);
+        model.SelectionChanged.connect(&this.setSelection);
     }
 
     void onStationAdded(Station station) {
@@ -77,5 +99,22 @@ class Mapview : View
         auto marker = this.idToMarker[station.id];
         this.markerLayer.removeMarker(marker);
         this.idToMarker.remove(station.id);
+    }
+
+    void setSelection(Nullable!Station selection) 
+    {
+        if(!this.currentSelection.isNull)
+        {
+            currentSelection.get().setSelected(false);
+            this.currentSelection.nullify();
+        }
+        if(!selection.isNull)
+        {
+            this.currentSelection = this.idToMarker[selection.get().id];
+            this.currentSelection.get().setSelected(true);
+            
+            Position pos = selection.get().position;
+            this.goTo(pos.lat, pos.lon);
+        }
     }
 }
