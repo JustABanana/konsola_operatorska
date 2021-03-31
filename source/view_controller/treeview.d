@@ -39,128 +39,133 @@ enum Column
 
 class StationTextColumn : TreeViewColumn
 {
-	CellRendererText cellRendererText;
-	string attributeType = "text";
+    CellRendererText cellRendererText;
+    string attributeType = "text";
 
-	this(string columnTitle, Column col)
-	{
-		cellRendererText = new CellRendererText();
-		
-		super(columnTitle, cellRendererText, attributeType, col);
-		setSortColumnId(col);
-		this.setReorderable(true);
-		this.setResizable(true);
-	} 
-} 
+    this(string columnTitle, Column col)
+    {
+        cellRendererText = new CellRendererText();
 
-extern(C) {
-    /// Function passed to gtk in a TreeViewColumn to convert the StationType enum into a CellRendererPixbuf 
-    void stationTypeCellDataFunc(GtkTreeViewColumn* col_c, GtkCellRenderer* ren_c, GtkTreeModel* model_c, GtkTreeIter* iter_c, void* data) { 
-		    // Convert arguments from C types to D types
-		    auto ren = new CellRenderer(ren_c);
-		    auto model = new ListStore(cast(GtkListStore*)model_c);
-		    auto iter = new TreeIter(iter_c);
-
-		    Value val;
-		    model.getValue(iter, Column.Type, val);
-
-		    StationType stationType = cast(StationType)val.getInt();
-
-		    ren.setProperty("icon-name", stationTypeToIconName(stationType));
-	}
+        super(columnTitle, cellRendererText, attributeType, col);
+        setSortColumnId(col);
+        this.setReorderable(true);
+        this.setResizable(true);
+    }
 }
 
-class StationTypeCol: TreeViewColumn
+extern (C)
+{
+    /// Function passed to gtk in a TreeViewColumn to convert the StationType enum into a CellRendererPixbuf 
+    void stationTypeCellDataFunc(GtkTreeViewColumn* col_c, GtkCellRenderer* ren_c,
+            GtkTreeModel* model_c, GtkTreeIter* iter_c, void* data)
+    {
+        // Convert arguments from C types to D types
+        auto ren = new CellRenderer(ren_c);
+        auto model = new ListStore(cast(GtkListStore*) model_c);
+        auto iter = new TreeIter(iter_c);
+
+        Value val;
+        model.getValue(iter, Column.Type, val);
+
+        StationType stationType = cast(StationType) val.getInt();
+
+        ren.setProperty("icon-name", stationTypeToIconName(stationType));
+    }
+}
+
+class StationTypeCol : TreeViewColumn
 {
     CellRendererPixbuf cellRenderer;
     Column col = Column.Type;
     string columnName = "Type";
     this()
     {
-	cellRenderer = new CellRendererPixbuf();
-	super(columnName, cellRenderer, "icon-name", col); 
-	cellRenderer.setProperty("icon-name", "broadcast-tower");
+        cellRenderer = new CellRendererPixbuf();
+        super(columnName, cellRenderer, "icon-name", col);
+        cellRenderer.setProperty("icon-name", "broadcast-tower");
 
-	this.setSortColumnId(col);
-	this.setReorderable(true);
+        this.setSortColumnId(col);
+        this.setReorderable(true);
 
-	this.setResizable(false);
+        this.setResizable(false);
 
-	this.setCellDataFunc(cellRenderer, &stationTypeCellDataFunc, null, null);
+        this.setCellDataFunc(cellRenderer, &stationTypeCellDataFunc, null, null);
     }
 }
 
-class BatteryLevelCol: TreeViewColumn
+class BatteryLevelCol : TreeViewColumn
 {
     CellRendererProgress cellRenderer;
     this()
     {
-	cellRenderer = new CellRendererProgress();
+        cellRenderer = new CellRendererProgress();
 
-	super("Battery Level", cellRenderer, "value", Column.BatteryLevel); 
+        super("Battery Level", cellRenderer, "value", Column.BatteryLevel);
 
-	this.setReorderable(true);
-	this.setSortColumnId(Column.BatteryLevel);
+        this.setReorderable(true);
+        this.setSortColumnId(Column.BatteryLevel);
 
-	this.setResizable(false);
+        this.setResizable(false);
     }
 }
 
-class SignalStrengthCol: TreeViewColumn
+class SignalStrengthCol : TreeViewColumn
 {
     CellRendererProgress cellRenderer;
     this()
     {
-	cellRenderer = new CellRendererProgress();
+        cellRenderer = new CellRendererProgress();
 
-	super("Signal", cellRenderer, "value", Column.Strength); 
+        super("Signal", cellRenderer, "value", Column.Strength);
 
-	this.setReorderable(true);
-	this.setSortColumnId(Column.Strength);
+        this.setReorderable(true);
+        this.setSortColumnId(Column.Strength);
 
-	this.setResizable(false);
+        this.setResizable(false);
     }
 }
 
-class StationTreeView : TreeView {
+class StationTreeView : TreeView
+{
     StationListStore listStore;
     StationModel stationModel;
-    this(StationModel model) {
-	this.stationModel = model;
-	appendColumn(new StationTextColumn("ID", Column.Id));
-	appendColumn(new StationTextColumn("Name", Column.Name));
-	appendColumn(new StationTypeCol());
-	appendColumn(new StationTextColumn("Serial", Column.Serial));
-	appendColumn(new SignalStrengthCol());
-	appendColumn(new BatteryLevelCol());
-	appendColumn(new StationTextColumn("Working Mode", Column.WorkingMode));
+    this(StationModel model)
+    {
+        this.stationModel = model;
+        appendColumn(new StationTextColumn("ID", Column.Id));
+        appendColumn(new StationTextColumn("Name", Column.Name));
+        appendColumn(new StationTypeCol());
+        appendColumn(new StationTextColumn("Serial", Column.Serial));
+        appendColumn(new SignalStrengthCol());
+        appendColumn(new BatteryLevelCol());
+        appendColumn(new StationTextColumn("Working Mode", Column.WorkingMode));
 
-	
-	auto listStore = new StationListStore(model);
-	this.listStore = listStore;
+        auto listStore = new StationListStore(model);
+        this.listStore = listStore;
 
-	this.getSelection().addOnChanged((TreeSelection sel) {
-		TreeIter iter; 
-		TreeModelIF model;
+        this.getSelection().addOnChanged((TreeSelection sel) {
+            TreeIter iter;
+            TreeModelIF model;
 
-		if(sel.getSelected(model, iter))
-		{
-		    Value val;
-		    model.getValue(iter, Column.Id, val);
-		    int id = val.getInt();
+            if (sel.getSelected(model, iter))
+            {
+                Value val;
+                model.getValue(iter, Column.Id, val);
+                int id = val.getInt();
 
-		    Station* station = id in this.stationModel.stations;
-		    // We want to crash if station is null, since that means our local model is broken
-		    assert(station);
+                Station* station = id in this.stationModel.stations;
+                // We want to crash if station is null, since that means our local model is broken
+                assert(station);
 
-		    this.stationModel.SelectionChanged.emit((*station).nullable);
-		} else 
-		{
-		    this.stationModel.SelectionChanged.emit(Nullable!Station.init);
-		}
-	});
+                this.stationModel.SelectionChanged.emit((*station).nullable);
+            }
+            else
+            {
+                this.stationModel.SelectionChanged.emit(Nullable!Station.init);
+            }
+        });
 
-	setModel(listStore);
+        setModel(listStore);
     }
 }
 

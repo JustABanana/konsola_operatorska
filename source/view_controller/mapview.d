@@ -18,7 +18,8 @@ import std.conv;
 import std.stdio;
 import std.typecons;
 
-class StationMarker : Marker {
+class StationMarker : Marker
+{
     Station station;
     Image img;
 
@@ -33,22 +34,27 @@ class StationMarker : Marker {
         this.updateStation(station);
     }
 
-    void updateStation(Station station) {
+    void updateStation(Station station)
+    {
         this.setLocation(station.position.lat, station.position.lon);
 
         this.img.setFromIconName(stationTypeToIconName(station.type));
 
         auto context = this.getStyleContext();
-        foreach (i; 0 .. 10) {
-            context.removeClass("station-status-"~i.to!string);
+        foreach (i; 0 .. 10)
+        {
+            context.removeClass("station-status-" ~ i.to!string);
         }
-            context.addClass("station-status-"~(station.calcStationHealth()/10).to!string);
+        context.addClass("station-status-" ~ (station.calcStationHealth() / 10).to!string);
     }
 
-    void setSelected(bool selected) {
+    void setSelected(bool selected)
+    {
         auto context = this.getStyleContext();
-        if(selected) context.addClass("selected-station");
-        else context.removeClass("selected-station");
+        if (selected)
+            context.addClass("selected-station");
+        else
+            context.removeClass("selected-station");
     }
 }
 
@@ -79,40 +85,43 @@ class Mapview : View
         this.markerLayer = new MarkerLayer(viewport);
         this.addLayer(markerLayer);
 
-	model.StationAdded.connect(&this.onStationAdded);
+        model.StationAdded.connect(&this.onStationAdded);
         model.StationChanged.connect(&this.onStationChanged);
         model.SelectionChanged.connect(&this.setSelection);
     }
 
-    void onStationAdded(Station station) {
+    void onStationAdded(Station station)
+    {
         auto marker = new StationMarker(station);
         this.idToMarker[station.id] = marker;
 
         this.markerLayer.addMarker(marker);
     }
 
-    void onStationChanged(Station station) {
+    void onStationChanged(Station station)
+    {
         this.idToMarker[station.id].updateStation(station);
     }
 
-    void onStationRemoved(Station station) {
+    void onStationRemoved(Station station)
+    {
         auto marker = this.idToMarker[station.id];
         this.markerLayer.removeMarker(marker);
         this.idToMarker.remove(station.id);
     }
 
-    void setSelection(Nullable!Station selection) 
+    void setSelection(Nullable!Station selection)
     {
-        if(!this.currentSelection.isNull)
+        if (!this.currentSelection.isNull)
         {
             currentSelection.get().setSelected(false);
             this.currentSelection.nullify();
         }
-        if(!selection.isNull)
+        if (!selection.isNull)
         {
             this.currentSelection = this.idToMarker[selection.get().id];
             this.currentSelection.get().setSelected(true);
-            
+
             Position pos = selection.get().position;
             this.goTo(pos.lat, pos.lon);
         }

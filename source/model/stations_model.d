@@ -38,7 +38,8 @@ class StationModel
         }, true);
     }
 
-    void changeSelection(Nullable!Station station) {
+    void changeSelection(Nullable!Station station)
+    {
         this.SelectionChanged.emit(station);
     }
 
