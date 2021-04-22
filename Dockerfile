@@ -7,6 +7,7 @@ RUN ["mkdir", "dub", "dmd"]
 
 RUN ["git", "clone", "https://gitlab.gnome.org/GNOME/libshumate.git"]
 WORKDIR /libshumate
+RUN ["git", "checkout","957a56611cbaca9aec51d157ce5a437196a71be4"]
 RUN ["mkdir", "build"]
 WORKDIR /libshumate/build
 RUN ["meson", "--prefix", "/usr/", ".."]
